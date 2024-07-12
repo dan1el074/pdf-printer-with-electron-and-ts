@@ -1,0 +1,23 @@
+{
+  "name": "pdf-printer-refactor",
+  "version": "1.0.0",
+  "description": "Um aplicativo já existente, mas escrito em Typescript",
+  "scripts": {
+    "start:prod": "electron ./main.js",
+    "build:prod": "electron-packager . ImprimePDF --platform=win32 --arch=x64 --out=dist --overwrite --icon=src/images/icon.ico"
+  },
+  "keywords": [
+    "Electron",
+    "typescript"
+  ],
+  "author": "Daniel Rodrigues de Vargas",
+  "devDependencies": {
+    "electron": "^28.1.0",
+    "@electron-forge/cli": "^7.3.0",
+    "globals": "^15.8.0"
+  },
+  "dependencies": {
+    "pdf-lib": "^1.17.1",
+    "xlsx": "^0.18.5"
+  }
+}
