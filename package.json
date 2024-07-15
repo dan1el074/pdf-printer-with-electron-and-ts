@@ -1,11 +1,11 @@
 {
   "name": "pdf-printer-refactor",
-  "version": "1.0.0",
+  "version": "2.1.4",
   "description": "Um aplicativo já existente, mas escrito em Typescript",
   "scripts": {
     "build:dev": "tsc",
     "watch:dev": "tsc -w",
-    "start:dev": "npm run build && electron ./dist/main.js"
+    "start:dev": "npm run build:dev && electron ./dist/main.js"
   },
   "keywords": [
     "Electron",

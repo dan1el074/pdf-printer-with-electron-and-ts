@@ -2,6 +2,7 @@
   "name": "pdf-printer-refactor",
   "version": "1.0.0",
   "description": "Um aplicativo já existente, mas escrito em Typescript",
+  "main": "main.js",
   "scripts": {
     "start:prod": "electron ./main.js",
     "build:prod": "electron-packager . ImprimePDF --platform=win32 --arch=x64 --out=dist --overwrite --icon=src/images/icon.ico"
