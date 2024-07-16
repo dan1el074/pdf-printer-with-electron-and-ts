@@ -34,7 +34,7 @@ Para executar a aplicação, certifique-se de que o seguinte esteja instalado:
 4. Rode o seguinte comando no terminal:
 
     ```bash
-    npm run build
+    npm run build:dev
     ```
 
 5. inicie a aplicação usando o comando:
