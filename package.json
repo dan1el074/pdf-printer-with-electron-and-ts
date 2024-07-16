@@ -3,6 +3,7 @@
   "version": "2.1.4",
   "description": "Um aplicativo já existente, mas escrito em Typescript",
   "scripts": {
+    "build": "tsc && cp -rv src/.dist/* ./dist/ && cp -rv ./src/public ./src/resources ./dist",
     "build:dev": "tsc",
     "watch:dev": "tsc -w",
     "start:dev": "npm run build:dev && electron ./dist/main.js"
