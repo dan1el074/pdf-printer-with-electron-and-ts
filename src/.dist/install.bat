@@ -1,7 +1,7 @@
 @echo off
 title ImprimePDF
 
-echo Instalador de ImprimePDF v4.2.9, uso exclusivo de:
+echo Instalador de ImprimePDF v2.1.5, uso exclusivo de:
 echo.
 echo       ___           ___           ___         ___           ___           ___
 echo      /__/\         /  /\         /  /\       /  /\         /  /\         /  /\
@@ -25,7 +25,7 @@ IF errorlevel=1 goto SIM
 echo O usuario pressionou [S]
 echo.
 echo Nao esqueca de iniciar o instalador novamente!!!
-start /wait %CD%\resources\resource\app\bin\node-v21.6.1-x64.msi
+start /wait %CD%\resources\resources\app\bin\node-v21.6.1-x64.msi
 echo.
 exit
 goto fim
@@ -40,7 +40,7 @@ IF errorlevel=2 goto NAO
 IF errorlevel=1 goto SIM
 :SIM
 echo O usuario pressionou [S]
-start /wait %CD%/bin/reader_br_install.exe
+start /wait %CD%\resources\resources\app\bin\reader_br_install.exe
 echo.
 echo Nao se esqueca de iniciar o Adobe pela primeira vez antes de testar o aplicativo!
 echo.
@@ -58,8 +58,10 @@ IF errorlevel=1 goto SIM
 echo O usuario pressionou [S]
 echo.
 rmdir /s /q "C:\Users\%USERNAME%\AppData\Roaming\ImprimePDF"
-Xcopy /E /I %CD%\resource C:\Users\%USERNAME%\AppData\Roaming\ImprimePDF
+Xcopy /E /I %CD%\resources C:\Users\%USERNAME%\AppData\Roaming\ImprimePDF
 cd C:\Users\%USERNAME%\AppData\Roaming\ImprimePDF
+rmdir /s /q "%CD%\resources\app\bin"
+rm /s /q "%CD%\resources\app\install.bat"
 start explorer C:\Users\%USERNAME%\AppData\Roaming\ImprimePDF
 echo.
 goto fim

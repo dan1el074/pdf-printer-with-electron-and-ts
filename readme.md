@@ -1,6 +1,6 @@
 # Aplicação ImprimePDF
 
-![Static Badge](https://img.shields.io/badge/status-finished-green) ![Static Badge](https://img.shields.io/badge/release-v2.1.4-blue)
+![Static Badge](https://img.shields.io/badge/status-finished-green) ![Static Badge](https://img.shields.io/badge/release-v2.1.5-blue)
 
 Este projeto é uma aplicação desktop em **Node.js**, usando **TypeScript** com o framework **Electron.js**, desenvolvida para o setor de PCP da empresa [Metaro Indústria e Comércio LTDA](https://www.metaro.com.br). Ela realiza uma varredura em um arquivo Excel e extrai códigos que representam projetos, dos quais precisam ser impressos em uma sequencia expecífica.
 
@@ -34,12 +34,10 @@ Para executar a aplicação, certifique-se de que o seguinte esteja instalado:
 4. Rode o seguinte comando no terminal:
 
     ```bash
-    npm run build:dev 
+    npm run build
     ```
-   
-5. Com a pasta `./dist` criada, copie todos os arquivos presentes em `./src/.dist/` para `./dist`
-6. Copie também, as pastas `./src/public` e `./src/resource` para `./dist`
-7. inicie a aplicação usando o comando:
+
+5. inicie a aplicação usando o comando:
 
     ```bash
     npm run start:dev 
@@ -79,16 +77,11 @@ Para executar a aplicação, certifique-se de que o seguinte esteja instalado:
     npm run build:prod
     ```
 
-2. Na pasta `./dist/dist/ImprimePDF-win32-x64`, apague os seguintes arquivos:
-
-    - `LICENSE`
-    - `LICENSES.chromium.html`
-
-3. Copie o arquivo do diretório `./dist/dist/ImprimePDF-win32-x64/resources/app/install.bat` dentro de `./dist/dist`
-
-4. Renomeie a pasta em `./dist/dist/ImprimePDF-win32-x64`, para `resources`
-
-5. Para instalar a aplicação no seu computador, basta iniciar o arquivo abaixo, e aperte as teclas **S** ou **N** para responder as perguntas referente a instalação.
+2. Para fazer todas as configurações necessárias, rode o seguinte comando:
+    ```bash
+    npm run config:prod
+    ``` 
+3. Para instalar a aplicação no seu computador, basta iniciar o arquivo abaixo, e aperte as teclas **S** ou **N** para responder as perguntas referente a instalação.
 
     ```bash
     start install.bat

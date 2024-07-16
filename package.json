@@ -1,12 +1,12 @@
 {
   "name": "pdf-printer-refactor",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "Um aplicativo já existente, mas escrito em Typescript",
   "scripts": {
-    "build": "tsc && cp -rv src/.dist/* ./dist/ && cp -rv ./src/public ./src/resources ./dist",
-    "build:dev": "tsc",
+    "build": "tsc",
+    "build:dev": "tsc && cd dist && mkdir dist && cd .. && cp -v src/.dist/install.bat ./dist/dist/install.bat && cp -rv ./src/public ./src/resources ./dist && cp -rv src/.dist/* ./dist && rm ./dist/install.bat",
     "watch:dev": "tsc -w",
-    "start:dev": "npm run build:dev && electron ./dist/main.js"
+    "start:dev": "npm run build && electron ./dist/main.js"
   },
   "keywords": [
     "Electron",

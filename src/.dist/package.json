@@ -1,12 +1,12 @@
 {
   "name": "pdf-printer-refactor",
-  "version": "1.0.0",
+  "version": "2.1.5",
   "description": "Um aplicativo já existente, mas escrito em Typescript",
   "main": "main.js",
   "scripts": {
     "start:prod": "electron ./main.js",
     "build:prod": "electron-packager ./ ImprimePDF --platform=win32 --arch=x64 --out=dist --overwrite --icon=public/images/icon.ico",
-    "config:prod": "rm -vf ./dist/ImprimePDF-win32-x64/LICENSE ./dist/ImprimePDF-win32-x64/LICENSES.chromium.html && cp -v ./install.bat ./dist && mv .dist/ImprimePDF-win32-x64 .dist/resources"
+    "config:prod": "rm -vf ./dist/ImprimePDF-win32-x64/LICENSE ./dist/ImprimePDF-win32-x64/LICENSES.chromium.html && mv ./dist/ImprimePDF-win32-x64 ./dist/resources"
   },
   "keywords": [
     "Electron",
