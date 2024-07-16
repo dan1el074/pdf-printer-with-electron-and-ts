@@ -9,7 +9,7 @@ export class Window {
     constructor(devMode?:boolean) {
         this.options = {
             title: 'ImprimePDF',
-            icon: path.join(__dirname, "../../../src/public/images/icon.ico"),
+            icon: path.join(__dirname, '../../public/images/icon.ico'),
             width: 500,
             height: 300,
             maxWidth: 500,
@@ -42,6 +42,7 @@ export class Window {
     }
 
     public async loadIndex(): Promise<void> {
-        await this.mainWindow.loadFile("../src/resources/views/index.html");
+        let indexPath = path.join(__dirname, '../../resources/views/index.html');
+        await this.mainWindow.loadFile(indexPath);
     }
 }

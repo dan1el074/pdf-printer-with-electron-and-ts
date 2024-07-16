@@ -84,9 +84,9 @@ Para executar a aplicação, certifique-se de que o seguinte esteja instalado:
     - `LICENSE`
     - `LICENSES.chromium.html`
 
-3. Copie o arquivo do diretório `./dist/dist/ImprimePDF-win32-x64/install.bat` dentro de `./dist/dist/ImprimePDF-win32-x64`
+3. Copie o arquivo do diretório `./dist/dist/ImprimePDF-win32-x64/resources/app/install.bat` dentro de `./dist/dist`
 
-4. Renomeie a pasta em `./dist/dist/ImprimePDF-win32-x64`, para `resource`
+4. Renomeie a pasta em `./dist/dist/ImprimePDF-win32-x64`, para `resources`
 
 5. Para instalar a aplicação no seu computador, basta iniciar o arquivo abaixo, e aperte as teclas **S** ou **N** para responder as perguntas referente a instalação.
 

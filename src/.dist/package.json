@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start:prod": "electron ./main.js",
-    "build:prod": "electron-packager . ImprimePDF --platform=win32 --arch=x64 --out=dist --overwrite --icon=src/images/icon.ico"
+    "build:prod": "electron-packager ./ ImprimePDF --platform=win32 --arch=x64 --out=dist --overwrite --icon=public/images/icon.ico"
   },
   "keywords": [
     "Electron",

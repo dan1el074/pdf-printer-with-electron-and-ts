@@ -25,7 +25,7 @@ IF errorlevel=1 goto SIM
 echo O usuario pressionou [S]
 echo.
 echo Nao esqueca de iniciar o instalador novamente!!!
-start /wait %CD%/bin/node-v21.6.1-x64.msi
+start /wait %CD%\resources\resource\app\bin\node-v21.6.1-x64.msi
 echo.
 exit
 goto fim
