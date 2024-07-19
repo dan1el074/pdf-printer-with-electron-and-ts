@@ -6,7 +6,7 @@ Este projeto é uma aplicação desktop em **Node.js**, usando **TypeScript** co
 
 ## Pré-requisitos
 
-Para executar a aplicação, certifique-se de que o seguinte esteja instalado:
+Os scripts só funcionam no Linux, portanto faça tudo dentro do "**Git Bash**" para que não aconteça nenhum erro usando Windows. Para executar a aplicação, certifique-se de que o seguinte esteja instalado:
 
 - [Node.js](https://nodejs.org/en/download/current) (versão 12 ou superior)
 - [Git](https://git-scm.com/download/win) (sistema de controle de versões)
