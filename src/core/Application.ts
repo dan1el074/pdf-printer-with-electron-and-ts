@@ -2,32 +2,35 @@ import { app, Menu, ipcMain, dialog } from "electron";
 import { Window } from "../app/models/Window";
 import { log } from "../app/services/logService"
 import { getPrinters } from "../app/services/printerService";
-import { findCodes } from "../app/services/excelService";
+import { findCodes, insertDETs } from "../app/services/excelService";
 import { findCodePath } from "../app/services/pathService";
 import { pdfJoin } from "../app/services/pdfService";
 import * as path from "path";
 
 export class Application {
-    private readonly prod: boolean;
     private data: Data;
     private window: Window;
     private running: boolean = false;
+    private codeWithDET: string;
 
-    constructor(prod: boolean) {
-        this.prod = prod
+    constructor() {
         this.data = {
             path: '',
             fileName: '',
             printers: [],
             codes: [],
-            temporaryFile: 'src/resources/temp/result.pdf'
+            temporaryFile: path.join(__dirname, '../resources/temp/result.pdf')
         };
 
-        if(this.prod) {
-            this.data.temporaryFile = path.join(__dirname, '../resources/temp/result.pdf');
-        }
-
-        let options: Array<string> = ['app/minimize','app/close','action/showDialog','action/getCodes','app/start']
+        let options: Array<string> = [
+            'app/minimize',
+            'app/close',
+            'action/showDialog',
+            'action/setDET',
+            'action/saveDETs',
+            'action/getCodes',
+            'app/start'
+        ]
         options.forEach((option: string): void => {
             this.actionFromBackend(option);
         })
@@ -48,19 +51,20 @@ export class Application {
                         log(`Impressoras encontradas:${NameOfPrinters}`);
 
                         let printerNames: Array<string> = [];
-                        this.data.printers.forEach((printer: Printable) => {
+                        this.data.printers.forEach((printer: Printable): void => {
                             printerNames.push(printer.name);
                         })
 
                         this.actionToBackend('set/printers', printerNames)
-                    }).catch(error => {
+                    })
+                    .catch(error => {
                         log(error);
                         this.actionToBackend('message/error', error);
                 });
             })
     }
 
-    public actionFromBackend(route: string) {
+    private actionFromBackend(route: string) {
         switch(route) {
             case 'app/minimize': {
                 ipcMain.on("app/minimize", () => {
@@ -87,6 +91,23 @@ export class Application {
                 });
                 break
             }
+            case 'action/setDET': {
+                ipcMain.on("action/setDET", (_event, fileDET: string) => {
+                    this.actionToBackend('action/showDetPage', fileDET)
+                });
+                break
+            }
+            case 'action/saveDETs': {
+                ipcMain.on("action/saveDETs", (_event, data: Array<string | number>): void => {
+                    log(`Número de DETs: ${data[0]}`);
+                    insertDETs(this.data.codes, data[0] as number, this.codeWithDET)
+                        .then(newCodes => {
+                            log(`Novos códigos: ${newCodes}`);
+                            this.restart(data[1] as string);
+                        }).catch(error => log(error));
+                });
+                break
+            }
             case 'action/getCodes': {
                 ipcMain.on("action/getCodes", () => {
                     this.data.codes = [];
@@ -96,7 +117,10 @@ export class Application {
                         .then((codes: Array<string>): void => {
                             this.data.codes = codes;
                             log(`Códigos encontrados: ${this.data.codes}`);
-                            this.actionToBackend('message/success', `Códigos encontrados: ${this.data.codes.length}`);
+                            this.actionToBackend(
+                                'message/success',
+                                `Códigos encontrados: ${this.data.codes.length}`
+                            );
                         }).catch((error: string): void => {
                             log(error);
                             this.actionToBackend('message/error', error)
@@ -106,8 +130,15 @@ export class Application {
             }
             case 'app/start': {
                 ipcMain.on("app/start", (_event, printer: string): void => {
-                    this.startApplication(printer).then().catch(() => {
-                        log('Aplicação ainda não foi finalizada');
+                    this.startApplication(printer)
+                        .then(() => {
+                            log('Arquivo impresso via: Adobe');
+                            setTimeout(() => {
+                                this.actionToBackend('message/success', 'Arquivo impresso via Adobe')
+                            },500)
+                            this.running = false;
+                        }).catch(error => {
+                        log(error);
                     });
                 });
                 break
@@ -115,7 +146,7 @@ export class Application {
         }
     }
 
-    public actionToBackend(route: string, message?: string | Array<string>): void {
+    private actionToBackend(route: string, message?: string | Array<string>): void {
         if(message) {
             this.window.mainWindow.webContents.send(route, message);
             return
@@ -124,13 +155,13 @@ export class Application {
         this.window.mainWindow.webContents.send(route);
     }
 
-    public hideMenu() {
+    private hideMenu() {
         const menuTemplate: any = [];
         const menu = Menu.buildFromTemplate(menuTemplate);
         Menu.setApplicationMenu(menu);
     }
 
-    public async getPath(): Promise<Array<string>> {
+    private async getPath(): Promise<Array<string>> {
         return new Promise(async (resolve, reject) => {
             let dialogPath = await dialog.showOpenDialog({
                 defaultPath: app.getPath("desktop"),
@@ -162,8 +193,21 @@ export class Application {
         })
     }
 
+    private checkDET(error: Array<string>): void {
+        let filePath = error[1];
+        let arrayFilePath = filePath.split('\\');
+        this.codeWithDET = arrayFilePath[arrayFilePath.length-1];
+
+        this.actionToBackend('message/error', error[0]);
+        if(!this.codeWithDET.includes('DET')) {
+            setTimeout(() => {
+                this.actionToBackend('message/options', this.codeWithDET);
+            },500)
+        }
+    }
+
     private startApplication(printer: string): Promise<void> {
-        return new Promise((_resolve, reject) => {
+        return new Promise((resolve, reject) => {
             if(this.running) {
                 reject('Aplicação ainda não foi finalizada!');
                 return
@@ -172,28 +216,49 @@ export class Application {
 
             findCodePath(this.data.path, this.data.codes)
                 .then((codePath: Array<string>): void => {
-                    this.actionToBackend('message/notice','Processando arquivos')
                     log(`Diretórios encontrados: ${codePath}`);
                     pdfJoin(codePath, this.data.temporaryFile)
                         .then(() => {
-                            let index: number = this.data.printers.findIndex((data) => data.name == printer)
+                            let index: number = this.data.printers.findIndex((data): boolean => {
+                                return data.name == printer
+                            })
                             this.data.printers[index].print(this.data.temporaryFile)
                                 .then(() => {
-                                    log('Arquivo impresso via: Adobe');
-                                    this.actionToBackend('message/success', 'Arquivo impresso via Adobe')
-                                    this.running = false;
-                                }).catch(error => {
+                                    resolve()
+                                })
+                                .catch(error => {
                                     log(error);
+                                    reject(error)
                                 });
-                        }).catch(error => {
-                        log(error);
-                        this.actionToBackend('message/error', error)
-                    })
+                        })
+                        .catch(error => {
+                            log(error[0]);
+                            this.checkDET(error);
+                            reject(error);
+                        })
 
-                }).catch((error: string): void => {
-                log('Não é possível buscar diretórios sem os códigos')
-                this.actionToBackend('message/simpleError', error)
-            })
+                })
+                .catch((error: string): void => {
+                    log('Não é possível buscar diretórios sem os códigos')
+                    this.actionToBackend('message/simpleError', error)
+                    reject(error);
+                })
         })
+    }
+
+    private restart(printer: string) {
+        this.running = false;
+        this.actionToBackend('action/restart');
+        setTimeout(() => {
+            this.startApplication(printer).then(() => {
+                log('Arquivo impresso via: Adobe');
+                setTimeout(() => {
+                    this.actionToBackend('message/success', 'Arquivo impresso via Adobe')
+                },500)
+                this.running = false;
+            }).catch(error => {
+                log(error)
+            })
+        }, 500)
     }
 }

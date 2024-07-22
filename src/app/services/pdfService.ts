@@ -12,12 +12,12 @@ export async function pdfJoin(arrayCodePath: Array<string>, temporaryFile: strin
                 pages.forEach((page) => newPDF.addPage(page));
             }
 
-            const novoPDFBytes = await newPDF.save();
-            await fs.writeFile(temporaryFile, novoPDFBytes);
+            const newPDFBytes = await newPDF.save();
+            await fs.writeFile(temporaryFile, newPDFBytes);
             await organizePDF(temporaryFile, temporaryFile);
             resolve();
         } catch (error) {
-            reject(`Erro! Arquivo nao encontrado: ${error.path}`)
+            reject([`Erro! Arquivo não encontrado: ${error.path}`, error.path])
         }
     })
 }

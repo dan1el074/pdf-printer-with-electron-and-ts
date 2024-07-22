@@ -1,12 +1,39 @@
 let contadorAlert: number  = 0;
 
-ipcRenderer.on("message/notice", (event, data) => {
+ipcRenderer.on('message/success', (event, data) => {
     contadorAlert += 1;
     let contador = contadorAlert;
-    let div = document.createElement("div");
-    div.setAttribute("id", `alert${contador}`);
-    div.classList.add("alert");
-    div.classList.add("notice");
+    let div = document.createElement('div');
+    div.setAttribute('id', `alert${contador}`);
+    div.classList.add('alert', 'success');
+    div.innerHTML = `<span>${data}</span>`;
+
+    alertContainer.appendChild(div);
+
+    try {
+        setTimeout(() => {
+            document.getElementById(`alert${contador}`).remove();
+        }, 5000);
+    } catch (e) {}
+});
+
+ipcRenderer.on('message/error', (event, data) => {
+    contadorAlert += 1;
+    let contador = contadorAlert;
+    let div = document.createElement('div');
+    div.setAttribute('id', `alert${contador}`);
+    div.classList.add('alert', 'erro');
+    div.innerHTML = `<span>${data}</span>`;
+
+    alertContainer.appendChild(div);
+});
+
+ipcRenderer.on('message/simpleError', (event, data) => {
+    contadorAlert += 1;
+    let contador = contadorAlert;
+    let div = document.createElement('div');
+    div.setAttribute('id', `alert${contador}`);
+    div.classList.add('alert', 'simple-erro');
     div.innerHTML = `<span>${data}</span>`;
 
     alertContainer.appendChild(div);
@@ -16,46 +43,29 @@ ipcRenderer.on("message/notice", (event, data) => {
     }, 5000);
 });
 
-ipcRenderer.on("message/success", (event, data) => {
+ipcRenderer.on('message/options', (event, possibleDETFile) => {
     contadorAlert += 1;
-    let contador = contadorAlert;
-    let div = document.createElement("div");
-    div.setAttribute("id", `alert${contador}`);
-    div.classList.add("alert");
-    div.classList.add("success");
-    div.innerHTML = `<span>${data}</span>`;
-
+    const contador = contadorAlert;
+    let div = document.createElement('div');
+    div.setAttribute('id', `alert${contador}`);
+    div.classList.add('alert', 'erro', 'option');
+    div.innerHTML = `
+        <span>O arquivo ${possibleDETFile} tem DET?</span>
+        <div class='btn-container'>
+            <button id='btnSetDET'>Sim</button>
+            <button id='btnCancelDET'>Não</button>
+        </div>
+    `;
     alertContainer.appendChild(div);
 
-    setTimeout(() => {
-        document.getElementById(`alert${contador}`).remove();
-    }, 5000);
-});
+    const btnSetDet = document.getElementById('btnSetDET');
+    btnSetDet.addEventListener('click', () => {
+        sendToBackend('action/setDET', possibleDETFile)
+    })
 
-ipcRenderer.on("message/error", (event, data) => {
-    contadorAlert += 1;
-    let contador = contadorAlert;
-    let div = document.createElement("div");
-    div.setAttribute("id", `alert${contador}`);
-    div.classList.add("alert");
-    div.classList.add("erro");
-    div.innerHTML = `<span>${data}</span>`;
-
-    alertContainer.appendChild(div);
-});
-
-ipcRenderer.on("message/simpleError", (event, data) => {
-    contadorAlert += 1;
-    let contador = contadorAlert;
-    let div = document.createElement("div");
-    div.setAttribute("id", `alert${contador}`);
-    div.classList.add("alert");
-    div.classList.add("simple-erro");
-    div.innerHTML = `<span>${data}</span>`;
-
-    alertContainer.appendChild(div);
-
-    setTimeout(() => {
-        document.getElementById(`alert${contador}`).remove();
-    }, 5000);
+    const btnCancelDet = document.getElementById('btnCancelDET');
+    btnCancelDet.addEventListener('click', () => {
+        actionPage.style.transform = 'translateX(100%)';
+        alertContainer.innerHTML = '';
+    })
 });

@@ -23,3 +23,27 @@ export async function findCodes(filePath: string): Promise<Array<string>> {
         resolve(codes);
     })
 }
+
+export async function insertDETs(codes: Array<string>, detNumbers: number, fileName: string): Promise<Array<string>> {
+    return new Promise((resolve, reject) => {
+        let projectNumber = String(fileName.split('.')[0]);
+        let index: number = codes.findIndex(code => {
+            return code == projectNumber;
+        })
+
+        if(index == -1) {
+            reject('Código com detalhamento não encontrado!')
+        }
+
+        const newDetCodes: Array<string> = [];
+
+        for(let i:number=1; i<=detNumbers; i++) {
+            newDetCodes.push(`${projectNumber}-DET${i}`)
+        }
+
+        let newCodes = codes;
+        newCodes.splice(index, 1, ...newDetCodes);
+
+        resolve(newCodes);
+    });
+}

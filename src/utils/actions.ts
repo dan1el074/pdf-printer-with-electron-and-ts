@@ -1,43 +1,71 @@
-const inputSearch: HTMLElement = document.querySelector(".input-search");
-const printBtn: HTMLElement = document.getElementById("print-btn");
-const placeholder: HTMLElement = document.getElementById("placeholder");
-const newPlaceholder: HTMLElement = document.getElementById("new-placeholder");
-const error: HTMLElement = document.querySelector(".error");
-const printersSelect: HTMLElement = document.getElementById("printers-select");
+const inputSearch: HTMLElement = document.querySelector('.input-search');
+const printBtn: HTMLElement = document.getElementById('print-btn');
+const placeholder: HTMLElement = document.getElementById('placeholder');
+const newPlaceholder: HTMLElement = document.getElementById('new-placeholder');
+const error: HTMLElement = document.querySelector('.error');
+const printersSelect: HTMLElement = document.getElementById('printers-select');
+const detPage: HTMLElement = document.querySelector('.det-page');
+const alertContainer: HTMLElement = document.querySelector('.alert-container');
+const saveDetAndPrint: HTMLElement = document.getElementById('det-btn');
 let showDialog: boolean = false;
 
 // mandando att pro backend
-inputSearch.addEventListener("click", () => {
+inputSearch.addEventListener('click', () => {
     if (!showDialog) {
-        ipcRenderer.send("action/showDialog");
+        sendToBackend('action/showDialog');
         showDialog = true;
     }
 });
 
-printBtn.addEventListener("click", () => {
-    const chosenPrinter: HTMLSelectElement = document.querySelector("#printers-select");
-    console.log(chosenPrinter.value);
-    ipcRenderer.send("app/start", chosenPrinter.value);
-    printBtn.style.backgroundColor = "#00E500";
-    printBtn.style.transition = "1s";
+printBtn.addEventListener('click', () => {
+    const chosenPrinter: HTMLSelectElement = document.querySelector('#printers-select');
+    sendToBackend('app/start', chosenPrinter.value);
+    printBtn.style.backgroundColor = '#00E500';
+    printBtn.style.transition = '1s';
 });
+
+saveDetAndPrint.addEventListener('click', () => {
+    const detValue: HTMLSelectElement = document.querySelector('#input-det')
+    const printer: HTMLSelectElement = document.querySelector('#printers-select');
+    sendToBackend('action/saveDETs', [detValue.value, printer.value]);
+    detValue.value = '';
+})
+
+function sendToBackend(route: string, data?: any) {
+    if(data) {
+        ipcRenderer.send(route, data);
+        return
+    }
+    ipcRenderer.send(route);
+}
 
 // recebendo att do backend
-ipcRenderer.on("action/closeDialog", (): void => {
+ipcRenderer.on('action/closeDialog', (): void => {
     showDialog = false;
 });
 
-ipcRenderer.on("set/fileName", (event, data): void => {
-    placeholder.style.display = "none";
-    inputSearch.style.border = "2px solid #fff";
-    newPlaceholder.style.display = "inline";
+ipcRenderer.on('set/fileName', (_event, data): void => {
+    placeholder.style.display = 'none';
+    inputSearch.style.border = '2px solid #fff';
+    newPlaceholder.style.display = 'inline';
     newPlaceholder.innerHTML = data;
-    error.style.display = "none";
+    error.style.display = 'none';
     showDialog = false;
 });
 
-ipcRenderer.on("set/printers", (event, data: Array<string>): void => {
+ipcRenderer.on('set/printers', (_event, data: Array<string>): void => {
     data.forEach((printer: string): void => {
-        printersSelect.innerHTML += `<option value="${printer}">${printer}</option>`;
+        printersSelect.innerHTML += `<option value='${printer}'>${printer}</option>`;
     });
+});
+
+ipcRenderer.on('action/showDetPage', (_event, fileDET: string): void => {
+    const detValue = document.getElementById('detValue');
+    detValue.innerText = fileDET.split('.')[0];
+    detPage.style.transform = 'translateX(-100%)';
+});
+
+ipcRenderer.on('action/restart', (_event, fileDET: string): void => {
+    alertContainer.innerHTML = '';
+    detPage.style.transform = 'translateX(100%)';
 });

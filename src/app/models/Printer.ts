@@ -8,24 +8,14 @@ export class Printer implements Printable {
     }
 
     public print(temporaryFilePath: string): Promise<void> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, reject): void => {
             const command: string = `"C:\\Program Files\\Adobe\\Acrobat DC\\Acrobat\\Acrobat.exe" /n /s /h /t "${temporaryFilePath}" "${this.name}"`;
-            exec(command, (error: Error, stdout: string, _stderr: string) => {
+            exec(command, (error: Error, _stdout: string, _stderr: string): void => {
                 if(error) {
                     reject(error);
-                    exec('taskkill /IM acrobat.exe /T /F')
-                    return
                 }
             });
-
-            if(!this.name.includes('Microsoft Print')) {
-                setTimeout(() => {
-                    exec('taskkill /IM acrobat.exe /T /F')
-                    resolve();
-                }, 5000)
-                resolve();
-                return;
-            }
+            resolve()
         })
     }
 }
