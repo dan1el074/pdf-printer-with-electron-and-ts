@@ -1,14 +1,14 @@
 .chrome-bar {
-    position: absolute;
+    position: fixed;
     display: flex;
     justify-content: space-between;
     align-items: center;
     background-color: #1f2021;
     border-bottom: 1px solid #b6b4b6;
     width: 100%;
-    top: 0px;
+    top: 0;
     right: 0;
-    z-index: 9;
+    z-index: 99;
 }
 
 .chrome-bar .descriptions {

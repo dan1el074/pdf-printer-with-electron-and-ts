@@ -111,6 +111,8 @@ section.action-page {
     top: 0;
     left: 100%;
     background-color: #eee;
+    transition: all 0.5s ease 0s;
+    z-index: 2
 }
 
 section.action-page label {
@@ -132,6 +134,39 @@ section.action-page .printer-input {
 
 section.action-page .printer-input {
     outline: 0;
+}
+
+section.det-page {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    background-color: #eee;
+    transition: all 0.5s ease 0s;
+    z-index: 3;
+}
+
+section.det-page label {
+    text-align: center;
+    margin-top: 40px;
+}
+
+section.det-page input {
+    padding: 5px 18px;
+    background-color: #fff;
+    border-radius: 4px;
+    border: 1px solid rgb(233, 233, 233);
+    width: 300px;
+    height: 35px;
+    margin: 15px 0;
+    overflow: hidden;
+    cursor: text;
+    text-align: center;
+    outline-color: #1689fc;
+}
+
+section.det-page input::-webkit-inner-spin-button,
+section.det-page input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
 }
 
 .error {
