@@ -20,14 +20,6 @@ img {
     pointer-events: none;
 }
 
-::selection {
-    background: transparent;
-}
-
-::-moz-selection {
-    background: transparent;
-}
-
 /* /////////// Tipografia /////////// */
 span,
 a,
@@ -91,6 +83,7 @@ section.home .input-search {
     max-width: 400px;
     max-height: 51px;
     overflow: hidden;
+    margin-top: 8px;
 }
 
 section.home .input-search #placeholder {
@@ -145,48 +138,58 @@ section.det-page {
     z-index: 3;
 }
 
-section.det-page label {
+label {
     text-align: center;
-    margin-top: 40px;
+    margin-top: 15px;
 }
 
-section.det-page input {
+input {
     padding: 5px 18px;
     background-color: #fff;
     border-radius: 4px;
     border: 1px solid rgb(233, 233, 233);
-    width: 300px;
+    width: 290px;
     height: 35px;
-    margin: 15px 0;
+    margin: 8px 0 0;
     overflow: hidden;
     cursor: text;
     text-align: center;
     outline-color: #1689fc;
 }
 
-section.det-page input::-webkit-inner-spin-button,
-section.det-page input::-webkit-outer-spin-button {
+input::-webkit-inner-spin-button,
+input::-webkit-outer-spin-button {
     -webkit-appearance: none;
 }
 
-.error {
+.det-page .btn {
+    margin-top: 15px;
+}
+
+.error,
+.error2 {
     display: block;
     color: red;
     margin-top: 6px;
+    height: 0;
+    transition: 1s;
+}
+
+.error:not(:empty),
+.error2:not(:empty) {
+    height: 15px;
+    margin-bottom: -10px;
 }
 
 /* /////////// keyframes /////////// */
 @keyframes shake {
-    0%,
-    100% {
+    0% {
         transform: translateX(0);
     }
-    20%,
-    60% {
+    50% {
         transform: translateX(-10px);
     }
-    40%,
-    80% {
+    100% {
         transform: translateX(10px);
     }
 }

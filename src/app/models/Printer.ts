@@ -9,6 +9,11 @@ export class Printer implements Printable {
 
     public print(temporaryFilePath: string): Promise<void> {
         return new Promise((resolve, reject): void => {
+            if(this.name == "Salvar como PDF") {
+                reject('Salvo como PDF')
+                return;
+            }
+
             const command: string = `"C:\\Program Files\\Adobe\\Acrobat DC\\Acrobat\\Acrobat.exe" /n /s /h /t "${temporaryFilePath}" "${this.name}"`;
             exec(command, (error: Error, _stdout: string, _stderr: string): void => {
                 if(error) {

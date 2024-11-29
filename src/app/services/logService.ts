@@ -9,11 +9,13 @@ export function log(message: string): void {
     const timestamp = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds() <= 9 ? `0${date.getSeconds()}` : date.getSeconds()}`;
     const path = require("path");
     const filePath = path.join(__dirname, `${route}${day}.txt`);
-    const content = `[${timestamp}] ${message} \r\n`;
+    const content = `[${timestamp}] ${message}\r\n`;
+
+    console.log(message);
 
     if(firstLog) {
         const firstContent: string =
-            `------------------------------  Acesso as ${timestamp}  --------------------------------\r\n`;
+            `------------------------------  Acesso às ${timestamp}  --------------------------------\r\n`;
 
         if(fs.existsSync(filePath)) {
             fs.appendFile(filePath, '\r\n \r\n' + firstContent, (err) => {

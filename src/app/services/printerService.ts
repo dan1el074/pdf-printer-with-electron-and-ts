@@ -7,6 +7,8 @@ export function getPrinters(): Promise<Printable[]> {
         let listPrinters: any[] = [];
         let printersName: Array<string> = [];
 
+        listPrinters.push(new Printer("Salvar como PDF"))
+
         exec(command, (error: Error, stdout: string, _stderr: string): void => {
             if (error) {
                 reject('Nenhuma impressora encontrada!');

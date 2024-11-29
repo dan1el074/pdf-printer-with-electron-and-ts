@@ -6,24 +6,29 @@ const detPreviousBtn: HTMLElement = document.getElementById('det-previous-btn');
 nextBtn.addEventListener('click', () => {
     const fileSpan: HTMLElement = document.getElementById('new-placeholder');
     const regex:RegExp = /\.[^.]+$/;
+    let validate = true;
 
-    if (fileSpan.innerHTML) {
-        if (String(fileSpan.innerHTML.match(regex)) == '.xlsx') {
-            actionPage.style.transform = 'translateX(-100%)';
-            ipcRenderer.send('action/getCodes');
-        } else {
-            inputSearch.style.border = '2px solid red';
-            inputSearch.style.animation =
-                'shake 0.5s cubic-bezier(0.455, 0.030, 0.515, 0.955) both';
-            error.style.display = 'block';
-            error.innerHTML = 'Arquivo invalido!';
-        }
-    } else {
+    if (!fileSpan.innerHTML) {
         inputSearch.style.border = '2px solid red';
-        inputSearch.style.animation =
-            'shake 0.5s cubic-bezier(0.455, 0.030, 0.515, 0.955) both';
         error.style.display = 'block';
         error.innerHTML = 'Selecione um arquivo!';
+        validate = false;
+    }
+
+    if (!inputOrder.value) {
+        inputOrder.style.border = '2px solid red';
+        error2.innerHTML = 'Digite o número do pedido!';
+        validate = false;
+    }
+
+    if (inputOrder.value) {
+        inputOrder.style.border = '2px solid #fff';
+        error2.innerHTML = '';
+    }
+
+    if(validate) {
+        actionPage.style.transform = 'translateX(-100%)';
+        ipcRenderer.send('action/getCodes', inputOrder.value);
     }
 });
 

@@ -1,8 +1,10 @@
 const inputSearch: HTMLElement = document.querySelector('.input-search');
+const inputOrder: HTMLInputElement = <HTMLInputElement>document.getElementById('input-order');
 const printBtn: HTMLElement = document.getElementById('print-btn');
 const placeholder: HTMLElement = document.getElementById('placeholder');
 const newPlaceholder: HTMLElement = document.getElementById('new-placeholder');
 const error: HTMLElement = document.querySelector('.error');
+const error2: HTMLElement = document.querySelector('.error2');
 const printersSelect: HTMLElement = document.getElementById('printers-select');
 const detPage: HTMLElement = document.querySelector('.det-page');
 const alertContainer: HTMLElement = document.querySelector('.alert-container');
