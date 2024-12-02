@@ -11,9 +11,9 @@ export async function findCodes(filePath: string): Promise<Array<Array<string>>>
 
         resExcel.forEach((currentRow: Array<string>): void => {
             let onlyCodes = String(currentRow[0]).match(regex);
-            if (onlyCodes) {
+            if (onlyCodes && onlyCodes.index <= 1) {
                 let rowCode: Array<string> = [];
-                rowCode.push(String(currentRow[0]));
+                rowCode.push(String(currentRow[0]).match(regex).input);
                 rowCode.push(String(currentRow[1]));
                 rowCode.push(String(currentRow[2]));
                 rowCode.push(String(currentRow[3]));
