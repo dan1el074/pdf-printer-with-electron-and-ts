@@ -11,7 +11,12 @@ Os scripts só funcionam no Linux, portanto faça tudo dentro do "**Git Bash**" 
 - [Node.js](https://nodejs.org/en/download/current) (versão 12 ou superior)
 - [Git](https://git-scm.com/download/win) (sistema de controle de versões)
 
-## Instalação
+## Download
+
+- [v2.2.1](https://github.com/dan1el074/pdf-printer-with-electron-and-ts/releases/tag/stable)
+- [Link direto](https://github.com/dan1el074/pdf-printer-with-electron-and-ts/releases/download/stable/imprimePDF-v2.2.1-setup.rar)
+
+## Criando instalador
 
 1. Clone este repositório para o seu ambiente local:
 
@@ -37,52 +42,32 @@ Os scripts só funcionam no Linux, portanto faça tudo dentro do "**Git Bash**" 
     npm run build:dev
     ```
 
-5. inicie a aplicação usando o comando:
-
-    ```bash
-    npm run start:dev 
-    ```
-
-## Preparando ambiente para deploy
-
-1. Entre no arquivo `./dist/main.js`, e mude para o parâmetro de `Application` para `true`, na linha de número 4:
+5. Entre no arquivo `./dist/main.js`, e mude para o parâmetro de `Application` para `true`, na linha de número 4:
 
     ```
     4    var application = new Application_1.Application(true) 
     ```
-
-2. Entre na pasta `dist`:
+    
+6. Entre na pasta `dist`:
 
     ```bash
     cd dist
     ```
-
-3. instale novamente as dependências:
+    
+7. instale novamente as dependências:
 
     ```bash
     npm install
     ```
 
-4. Para testas a aplicação, execute o comando:
-
-    ```bash
-    npm run start:prod
-    ```
-
-## Criando instalador:
-
-1. Dentro de `./dist`, rode o seguinte comando no terminal:
+8. Dentro de `./dist`, rode o seguinte comando no terminal:
 
     ```bash
     npm run build:prod
     ```
 
-2. Para fazer todas as configurações necessárias, rode o seguinte comando:
+9. Para fazer todas as configurações necessárias, rode o seguinte comando:
     ```bash
     npm run config:prod
     ``` 
-3. Para instalar a aplicação no seu computador, basta iniciar o arquivo abaixo, e aperte as teclas **S** ou **N** para responder as perguntas referente a instalação.
-
-    ```bash
-    start install.bat
-    ```
+10. Para instalar a aplicação no seu computador, basta iniciar o arquivo `install.bat`, e aperte as teclas **S** ou **N** para responder as perguntas referente a instalação.
