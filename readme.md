@@ -30,7 +30,7 @@ Os scripts só funcionam no Linux, portanto faça tudo dentro do "**Git Bash**" 
     ```bash
     npm install
     ```
-## Iniciar a aplicação
+## Iniciar aplicação:
 
 Rode o seguinte comando no terminal:
 
@@ -38,7 +38,7 @@ Rode o seguinte comando no terminal:
 npm run start:dev 
 ```
 
-## Criando instalador:
+## Criar executável:
 
 Rode o seguinte comando no terminal:
 
