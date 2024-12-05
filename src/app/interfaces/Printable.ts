@@ -1,4 +1,4 @@
 interface Printable {
     name: string;
-    print(temporaryFilePath: string): Promise<void>;
+    print(temporaryFilePath: string): Promise<string>;
 }

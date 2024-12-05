@@ -1,12 +1,12 @@
 {
-  "name": "pdf-printer-refactor",
-  "version": "2.1.5",
+  "name": "ImprimePDF-data",
+  "version": "3.0.1",
   "description": "Um aplicativo já existente, mas escrito em Typescript",
   "main": "main.js",
   "scripts": {
     "start:prod": "electron ./main.js",
     "build:prod": "electron-packager ./ ImprimePDF --platform=win32 --arch=x64 --out=dist --overwrite --icon=public/images/icon.ico",
-    "config:prod": "rm -vf ./dist/ImprimePDF-win32-x64/LICENSE ./dist/ImprimePDF-win32-x64/LICENSES.chromium.html && mv ./dist/ImprimePDF-win32-x64 ./dist/resources"
+    "config:prod": "rm -vf ./dist/ImprimePDF-win32-x64/LICENSE ./dist/ImprimePDF-win32-x64/LICENSES.chromium.html"
   },
   "keywords": [
     "Electron",
@@ -14,12 +14,16 @@
   ],
   "author": "Daniel Rodrigues de Vargas",
   "devDependencies": {
-    "electron": "^28.1.0",
     "@electron-forge/cli": "^7.3.0",
-    "globals": "^15.8.0"
+    "@types/node": "^20.14.10",
+    "electron": "^28.1.0",
+    "globals": "^15.8.0",
+    "typescript": "^4.8.3"
   },
   "dependencies": {
+    "fs": "^0.0.1-security",
     "pdf-lib": "^1.17.1",
+    "pdf-to-printer": "^5.6.0",
     "xlsx": "^0.18.5"
   }
 }

@@ -1,4 +1,4 @@
-export async function findCodePath(codes: Array<Array<string>>): Promise<Array<string>> {
+export async function findCodePath(codes: Array<Array<string>>, projectPath: string): Promise<Array<string>> {
     return new Promise((resolve, reject) => {
         if(codes.length <= 0) {
             reject('Não é possível buscar diretórios sem códigos');
@@ -6,7 +6,6 @@ export async function findCodePath(codes: Array<Array<string>>): Promise<Array<s
 
         let codeFolders: Array<string> = [];
         let startCode: string;
-        let dirPath: string = "\\\\metaro-server\\Projetos\\";
 
         codes.forEach((code: Array<string>): void => {
             startCode = code[0];
@@ -21,7 +20,7 @@ export async function findCodePath(codes: Array<Array<string>>): Promise<Array<s
                 subPathName = "0" + subPathName;
             }
 
-            const foundFilePath: string = `${dirPath}${subPathName}000\\${code[0]}.pdf`;
+            const foundFilePath: string = `${projectPath}${subPathName}000\\${code[0]}.pdf`;
             codeFolders.push(foundFilePath);
         });
 

@@ -11,9 +11,12 @@ ipcRenderer.on('message/success', (event, data) => {
     alertContainer.appendChild(div);
 
     try {
-        setTimeout(() => {
-            document.getElementById(`alert${contador}`).remove();
-        }, 5000);
+        let currentAlert: HTMLElement = document.getElementById(`alert${contador}`);
+        if(currentAlert) {
+            setTimeout(() => {
+                currentAlert.remove();
+            }, 5000);
+        }
     } catch (e) {}
 });
 

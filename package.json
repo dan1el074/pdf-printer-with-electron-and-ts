@@ -1,12 +1,13 @@
 {
-  "name": "pdf-printer-refactor",
-  "version": "2.1.5",
+  "name": "ImprimePDF",
+  "version": "3.0.1",
   "description": "Um aplicativo já existente, mas escrito em Typescript",
   "scripts": {
     "build": "tsc",
-    "build:dev": "rm -rf ./dist && tsc && cd dist && mkdir dist && cd .. && cp -v src/.dist/install.bat ./dist/dist/install.bat && cp -rv ./src/public ./src/resources ./dist && cp -rv src/.dist/* ./dist && rm ./dist/install.bat",
+    "build:dev": "rm -rf ./dist && tsc && cd dist && mkdir dist && cd .. && cp -rv ./src/public ./src/resources ./dist && cp -rv src/.dist/* ./dist && cp -v src/config.json ./dist/config.json",
     "watch:dev": "tsc -w",
-    "start:dev": "npm run build && electron ./dist/main.js"
+    "start:dev": "npm run build && electron ./dist/main.js",
+    "build:prod": "npm run build:dev && cd dist && npm install && npm run build:prod && npm run config:prod"
   },
   "keywords": [
     "Electron",
@@ -23,6 +24,7 @@
   "dependencies": {
     "fs": "^0.0.1-security",
     "pdf-lib": "^1.17.1",
+    "pdf-to-printer": "^5.6.0",
     "xlsx": "^0.18.5"
   }
 }

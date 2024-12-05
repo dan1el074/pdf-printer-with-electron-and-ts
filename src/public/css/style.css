@@ -155,6 +155,7 @@ input {
     cursor: text;
     text-align: center;
     outline-color: #1689fc;
+    text-transform: uppercase;
 }
 
 input::-webkit-inner-spin-button,
@@ -172,24 +173,11 @@ input::-webkit-outer-spin-button {
     color: red;
     margin-top: 6px;
     height: 0;
-    transition: 1s;
+    transition: .4s;
 }
 
 .error:not(:empty),
 .error2:not(:empty) {
     height: 15px;
     margin-bottom: -10px;
-}
-
-/* /////////// keyframes /////////// */
-@keyframes shake {
-    0% {
-        transform: translateX(0);
-    }
-    50% {
-        transform: translateX(-10px);
-    }
-    100% {
-        transform: translateX(10px);
-    }
 }

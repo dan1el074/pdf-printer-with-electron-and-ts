@@ -28,6 +28,8 @@ export class Window {
             this.devMode = devMode;
             this.options.maxWidth = 9999;
             this.options.maxHeight = 9999;
+            this.options.width = 1200;
+            this.options.height = 500;
             this.options.fullscreenable = true;
             this.options.resizable = true;
             this.options.frame = true;

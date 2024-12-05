@@ -3,6 +3,6 @@ interface Data {
     fileName: string;
     printers: Array<Printable>;
     codes: Array<Array<string>>;
-    order: number;
+    order: string;
     temporaryFile: string;
 }

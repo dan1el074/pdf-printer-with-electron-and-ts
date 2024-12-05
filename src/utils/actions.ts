@@ -1,4 +1,6 @@
 const inputSearch: HTMLElement = document.querySelector('.input-search');
+const windowTitle: HTMLElement = document.getElementById("windowTitle");
+const appTitle: HTMLElement = document.getElementById("appTitle");
 const inputOrder: HTMLInputElement = <HTMLInputElement>document.getElementById('input-order');
 const printBtn: HTMLElement = document.getElementById('print-btn');
 const placeholder: HTMLElement = document.getElementById('placeholder');
@@ -7,9 +9,18 @@ const error: HTMLElement = document.querySelector('.error');
 const error2: HTMLElement = document.querySelector('.error2');
 const printersSelect: HTMLElement = document.getElementById('printers-select');
 const detPage: HTMLElement = document.querySelector('.det-page');
+const detInput: HTMLInputElement = <HTMLInputElement>document.querySelector('#input-det')
 const alertContainer: HTMLElement = document.querySelector('.alert-container');
 const saveDetAndPrint: HTMLElement = document.getElementById('det-btn');
 let showDialog: boolean = false;
+
+function sendToBackend(route: string, data?: any) {
+    if(data) {
+        ipcRenderer.send(route, data);
+        return
+    }
+    ipcRenderer.send(route);
+}
 
 // mandando att pro backend
 inputSearch.addEventListener('click', () => {
@@ -33,15 +44,12 @@ saveDetAndPrint.addEventListener('click', () => {
     detValue.value = '';
 })
 
-function sendToBackend(route: string, data?: any) {
-    if(data) {
-        ipcRenderer.send(route, data);
-        return
-    }
-    ipcRenderer.send(route);
-}
-
 // recebendo att do backend
+ipcRenderer.on('app/setTitle', (_event, version: string): void => {
+    appTitle.innerHTML += " " + version;
+    windowTitle.innerHTML += " " + version;
+});
+
 ipcRenderer.on('action/closeDialog', (): void => {
     showDialog = false;
 });
@@ -52,6 +60,7 @@ ipcRenderer.on('set/fileName', (_event, data): void => {
     newPlaceholder.style.display = 'inline';
     newPlaceholder.innerHTML = data;
     error.style.display = 'none';
+    inputOrder.focus();
     showDialog = false;
 });
 
@@ -65,6 +74,7 @@ ipcRenderer.on('action/showDetPage', (_event, fileDET: string): void => {
     const detValue = document.getElementById('detValue');
     detValue.innerText = fileDET.split('.')[0];
     detPage.style.transform = 'translateX(-100%)';
+    detInput.focus();
 });
 
 ipcRenderer.on('action/restart', (_event, fileDET: string): void => {

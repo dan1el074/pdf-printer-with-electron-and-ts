@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ImprimePDF</title>
+    <title id="appTitle">ImprimePDF</title>
     <link rel="stylesheet" href="../../public/css/top-bar.css">
     <link rel="stylesheet" href="../../public/css/style.css">
     <link rel="stylesheet" href="../../public/css/alert.css">
@@ -14,7 +14,7 @@
     <header class="chrome-bar">
       <div class="descriptions">
         <img src="../../public/images/icon.png" alt="ícone" />
-        <span>Imprime Arquivos</span>
+        <span id="windowTitle">ImprimePDF</span>
       </div>
       <div class="tab-bar">
         <div class="window-buttons">
@@ -42,7 +42,7 @@
       <small id="error" class="error"></small>
 
       <label for="input-order">Número do pedido:</label>
-      <input type="number" name="input-order" id="input-order" placeholder="9493" />
+      <input name="input-order" maxlength="7" id="input-order" placeholder="PE71" />
       <small id="error2" class="error2"></small>
 
       <button id="next-btn" class="btn btn-next">Avançar ></button>
