@@ -1,14 +1,11 @@
-import {exec} from "child_process";
 import {log} from "../services/logService";
 import printer = require('pdf-to-printer');
 
 export class Printer implements Printable {
     readonly name: string;
-    private adobePath: string;
 
-    constructor(name: string, adobePath: string) {
+    constructor(name: string) {
         this.name = name;
-        this.adobePath = adobePath;
     }
 
     public print(temporaryFilePath: string): Promise<string> {
@@ -23,18 +20,6 @@ export class Printer implements Printable {
             await this.printWithPdfToPrinter(temporaryFilePath)
                 .then(text => resolve(text))
                 .catch(text => reject(text))
-        })
-    }
-
-    public printWithAdobe(temporaryFilePath: string): Promise<string> {
-        return new Promise((resolve, reject) => {
-            const command: string = `"${this.adobePath}" /n /s /h /t "${temporaryFilePath}" "${this.name}"`;
-            exec(command, (error: Error, _stdout: string, _stderr: string): void => {
-                if (error) {
-                    reject(error);
-                }
-            });
-            resolve("Arquivo impresso via: Adobe");
         })
     }
 

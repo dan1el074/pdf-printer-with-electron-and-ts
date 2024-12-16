@@ -25,7 +25,6 @@ document.addEventListener('keypress', (event) => {
 
 nextBtn.addEventListener('click', () => {
     const fileSpan: HTMLElement = document.getElementById('new-placeholder');
-    const regex: RegExp = /\b(PE)?\d+\b/;
     let validatedOrder = false;
     let validatedFile = false;
 
@@ -49,22 +48,17 @@ nextBtn.addEventListener('click', () => {
     }
 
     if (inputOrder.value) {
-        if(inputOrder.value.includes(".")) {
-            inputOrder.style.border = '2px solid red';
-            error2.innerHTML = 'Digite um pedido válido!';
-            return
-        }
+        validatedOrder = true;
+        // if (!inputOrder.value.toUpperCase().match(regex)) {
+        //     inputOrder.style.border = '2px solid red';
+        //     error2.innerHTML = 'Digite um pedido válido!';
+        //     return
+        // }
 
-        if (!inputOrder.value.toUpperCase().match(regex)) {
-            inputOrder.style.border = '2px solid red';
-            error2.innerHTML = 'Digite um pedido válido!';
-            return
-        }
-
-        if (inputOrder.value.toUpperCase().match(regex)) {
-            inputOrder.value = inputOrder.value.toUpperCase().match(regex).input.trim().split(" ")[0]
-            validatedOrder = true;
-        }
+        // if (inputOrder.value.toUpperCase().match(regex)) {
+        //     inputOrder.value = inputOrder.value.toUpperCase().match(regex).input.trim().split(" ")[0]
+        //     validatedOrder = true;
+        // }
     }
 
     if (validatedOrder && validatedFile) {

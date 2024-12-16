@@ -1,5 +1,6 @@
 import {degrees, PDFDocument, StandardFonts, rgb} from "pdf-lib";
 import fs = require("fs/promises");
+import {log} from "./logService";
 
 export async function pdfJoin(arrayCodePath: Array<string>, temporaryFile: string): Promise<void> {
     return new Promise(async (resolve, reject) => {
@@ -24,7 +25,6 @@ export async function pdfJoin(arrayCodePath: Array<string>, temporaryFile: strin
 }
 
 async function organizePDF(inputPath: string) {
-    const outputPath = inputPath;
     try {
         const inputBytes = await fs.readFile(inputPath);
         const pdfDoc = await PDFDocument.load(inputBytes);
@@ -44,15 +44,13 @@ async function organizePDF(inputPath: string) {
         }
 
         const modifiedBytes = await pdfDoc.save();
-        await fs.writeFile(outputPath, modifiedBytes);
+        await fs.writeFile(inputPath, modifiedBytes);
     } catch (error) {
-        console.log(`Erro ao organizar o PDF: ${error}`);
+        log(`Erro ao organizar o PDF: ${error}`);
     }
 }
 
 export async function addWaterMarker(order: string, codes: Array<Array<String>>, inputPath: string) {
-    const outputPath: string = inputPath;
-
     const existingPdfBytes = await fs.readFile(inputPath);
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
     const pages = pdfDoc.getPages();
@@ -67,8 +65,6 @@ export async function addWaterMarker(order: string, codes: Array<Array<String>>,
         let fontSize = 13;
         let lineHeight = 6.8;
         let positionX = 27;
-
-        console.log(pages[i].getSize())
 
         if(pages[i].getSize().width > 600) {
             fontSize = 12;
@@ -88,5 +84,5 @@ export async function addWaterMarker(order: string, codes: Array<Array<String>>,
     };
 
     const pdfBytes = await pdfDoc.save();
-    await fs.writeFile(outputPath, pdfBytes);
+    await fs.writeFile(inputPath, pdfBytes);
 }

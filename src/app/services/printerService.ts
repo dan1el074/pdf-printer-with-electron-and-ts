@@ -1,13 +1,13 @@
 import { exec } from "child_process";
 import { Printer } from "../models/Printer";
 
-export function getPrinters(adobePath: string): Promise<Printable[]> {
+export function getPrinters(): Promise<Printable[]> {
     return new Promise((resolve, reject): void => {
         const command: string = 'wmic printer get name';
         let listPrinters: any[] = [];
         let printersName: Array<string> = [];
 
-        listPrinters.push(new Printer("Salvar como PDF", adobePath))
+        listPrinters.push(new Printer("Salvar como PDF"))
 
         exec(command, (error: Error, stdout: string, _stderr: string): void => {
             if (error) {
@@ -17,13 +17,14 @@ export function getPrinters(adobePath: string): Promise<Printable[]> {
             printersName = stdoutResolve(stdout);
 
             printersName.forEach( (currentPrinterName: string): void => {
-                listPrinters.push(new Printer(currentPrinterName, adobePath))
+                listPrinters.push(new Printer(currentPrinterName))
             })
 
             resolve(listPrinters);
         });
     });
 }
+
 function stdoutResolve(stdout: string): Array<string> {
     let res: string = stdout.trim();
     let printersName: Array<string> = res.split(/\r?\n/g);

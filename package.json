@@ -1,6 +1,6 @@
 {
   "name": "ImprimePDF",
-  "version": "3.0.1",
+  "version": "3.0.3",
   "description": "Um aplicativo já existente, mas escrito em Typescript",
   "scripts": {
     "build": "tsc",

@@ -1,6 +1,6 @@
 {
-  "version": "v3.0.1",
+  "dev": false,
+  "version": "3.0.3",
   "projectPath": "\\\\metaro-server\\Projetos\\",
-  "adobePath": "C:\\Program Files\\Adobe\\Acrobat DC\\Acrobat\\Acrobat.exe",
-  "dev": false
+  "tmpFile": ""
 }

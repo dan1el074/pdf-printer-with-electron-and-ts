@@ -5,6 +5,7 @@ import {getPrinters} from "../app/services/printerService";
 import {findCodes, insertDETs} from "../app/services/excelService";
 import {findCodePath} from "../app/services/pathService";
 import {pdfJoin, addWaterMarker} from "../app/services/pdfService";
+import {exec} from "child_process";
 import * as path from "path";
 import fs = require("fs/promises");
 
@@ -45,45 +46,77 @@ export class Application {
     public init(): void {
         this.readConfigFile()
             .then((): void => {
-                app.whenReady()
-                    .then(async (): Promise<void> => {
-                        this.window = new Window(this.configData.dev);
-                        await this.window.loadIndex();
+                this.createResultPath()
+                    .then((): void => {
+                        app.whenReady()
+                            .then(async (): Promise<void> => {
+                                this.window = new Window(this.configData.dev);
+                                await this.window.loadIndex();
 
-                        this.actionFromBackend("app/setTitle", this.configData.version);
+                                this.actionFromBackend("app/setTitle", this.configData.version);
 
-                        getPrinters(this.configData.adobePath)
-                            .then(printers => {
-                                this.data.printers = printers;
-                                const NameOfPrinters = this.data.printers.map(printer => ' ' + printer.name)
-                                log(`Impressoras encontradas:${NameOfPrinters}`);
+                                getPrinters()
+                                    .then(printers => {
+                                        this.data.printers = printers;
+                                        const NameOfPrinters = this.data.printers.map(printer => ' ' + printer.name)
+                                        log(`Impressoras encontradas:${NameOfPrinters}`);
 
-                                let printerNames: Array<string> = [];
-                                this.data.printers.forEach((printer: Printable): void => {
-                                    printerNames.push(printer.name);
-                                })
+                                        let printerNames: Array<string> = [];
+                                        this.data.printers.forEach((printer: Printable): void => {
+                                            printerNames.push(printer.name);
+                                        })
 
-                                this.actionFromBackend('set/printers', printerNames)
+                                        this.actionFromBackend('set/printers', printerNames)
+                                    })
+                                    .catch(error => {
+                                        log(error);
+                                        this.actionFromBackend('message/error', error);
+                                    });
                             })
-                            .catch(error => {
-                                log(error);
-                                this.actionFromBackend('message/error', error);
-                            });
                     })
             })
             .catch(erro => log(erro));
     }
 
+    private async copyFileIfNotExists(source: string, destination: string) {
+        try {
+            const command1: string = 'mkdir "%APPDATA%\\ImprimePDF"';
+            exec(command1);
+            // const command2: string = `copy "C:\\Program Files (x86)\\Metaro\\ImprimePDF-${this.configData.version}\\resources\\app\\resources\\temp\\result.pdf" "%APPDATA%\\ImprimePDF\\result.pdf"`;
+            // exec(command2);
+        } catch(error) {
+            log(error);
+        }
+    }
+
+    private async createResultPath() {
+        const appDataPath = process.env.APPDATA;
+        const dirPath = path.join(appDataPath, 'ImprimePDF');
+        const filePath = path.join(dirPath, 'result.pdf');
+
+        if (this.configData.tmpFile) {
+            this.data.temporaryFile = this.configData.tmpFile;
+            return;
+        }
+
+        try {
+            await this.copyFileIfNotExists(this.data.temporaryFile, filePath);
+            this.data.temporaryFile = filePath;
+        } catch (err) {
+            log(`Erro ao criar o caminho do resultado: ${err.message}`);
+        }
+    }
+
     private async readConfigFile(): Promise<void> {
         try {
-            const filePath = path.join(__dirname, '../config.json');
-            const data = await fs.readFile(filePath, 'utf8');
+            const configPath = path.join(__dirname, '../config.json');
+            const data = await fs.readFile(configPath, 'utf8');
             const configData = JSON.parse(data);
             this.configData = {
                 dev: configData.dev,
                 version: configData.version,
                 projectPath: configData.projectPath,
-                adobePath: configData.adobePath
+                tmpFile: configData.tmpFile
             }
 
             let message = `Arquivo de configuração: {${this.span}    dev: ${configData.dev},${this.span}    version: ${configData.version},${this.span}    projectPath: ${configData.projectPath},${this.span}    adobePath: ${configData.adobePath},${this.span}}`;
