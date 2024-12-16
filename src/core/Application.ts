@@ -80,10 +80,10 @@ export class Application {
 
     private async copyFileIfNotExists(source: string, destination: string) {
         try {
-            const command1: string = 'mkdir "%APPDATA%\\ImprimePDF"';
+            const command1: string = 'mkdir "%APPDATA%\\ImprimePDF\\temp"';
             exec(command1);
-            // const command2: string = `copy "C:\\Program Files (x86)\\Metaro\\ImprimePDF-${this.configData.version}\\resources\\app\\resources\\temp\\result.pdf" "%APPDATA%\\ImprimePDF\\result.pdf"`;
-            // exec(command2);
+            const command2: string = 'mkdir "%APPDATA%\\ImprimePDF\\logs"';
+            exec(command2);
         } catch(error) {
             log(error);
         }
@@ -91,7 +91,8 @@ export class Application {
 
     private async createResultPath() {
         const appDataPath = process.env.APPDATA;
-        const dirPath = path.join(appDataPath, 'ImprimePDF');
+        let dirPath = path.join(appDataPath, 'ImprimePDF');
+        dirPath = path.join(dirPath, 'temp');
         const filePath = path.join(dirPath, 'result.pdf');
 
         if (this.configData.tmpFile) {

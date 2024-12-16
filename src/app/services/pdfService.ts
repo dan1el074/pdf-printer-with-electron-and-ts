@@ -62,12 +62,12 @@ export async function addWaterMarker(order: string, codes: Array<Array<String>>,
         }
 
         const watermarkText: string = `Pedido: ${order} \r\nQuantidade: ${codes[i][3]}${codes[i][2]} \r\nRoteiro: ${codes[i][4]}`;
-        let fontSize = 13;
+        let fontSize = 12;
         let lineHeight = 6.8;
         let positionX = 27;
 
         if(pages[i].getSize().width > 600) {
-            fontSize = 12;
+            fontSize = 11;
             lineHeight = 6.8;
             positionX = 15;
         }
@@ -75,7 +75,7 @@ export async function addWaterMarker(order: string, codes: Array<Array<String>>,
         pages[i].drawText(watermarkText, {
             font: HelveticaFont,
             x: positionX,
-            y: 45,
+            y: 30,
             size: fontSize,
             color: rgb(0, 0, 0),
             lineHeight: lineHeight,

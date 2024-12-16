@@ -3,12 +3,14 @@ import * as fs from 'fs';
 let firstLog = true;
 
 export function log(message: string): void {
-    const route: string = '../../resources/logs/';
     const date = new Date();
     const day = `${date.getDate()<=9?'0'+date.getDate():date.getDate()}-${date.getMonth()+1<=9?'0'+(date.getMonth()+1):date.getMonth()+1}-${date.getFullYear()}`
     const timestamp = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds() <= 9 ? `0${date.getSeconds()}` : date.getSeconds()}`;
     const path = require("path");
-    const filePath = path.join(__dirname, `${route}${day}.txt`);
+    const appDataPath = process.env.APPDATA;
+    const dirPath = path.join(appDataPath, 'ImprimePDF');
+    const logPath = path.join(dirPath, 'logs');
+    const filePath = path.join(logPath, `${day}.txt`);
     const content = `[${timestamp}] ${message}\r\n`;
 
     console.log(message);
