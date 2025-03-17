@@ -38,7 +38,7 @@ async function organizePDF(inputPath: string) {
                 page.setRotation(degrees(90));
             }
 
-            if (page.getWidth() > 600) {
+            if (page.getWidth() > 1190 && page.getWidth() < 1193) {
                 page.scale(0.706,0.706);
             }
         }
@@ -86,3 +86,6 @@ export async function addWaterMarker(order: string, codes: Array<Array<String>>,
     const pdfBytes = await pdfDoc.save();
     await fs.writeFile(inputPath, pdfBytes);
 }
+
+//TODO: ARRUMAR QUANTIDADES NOS ARQUIVOS COM MAIS DE UM PDF!!
+//TODO: criar um mapa com 2 parâmetros, o primeiro sendo o indice que repetirá, e o segundo com quantas vezes repetirá
