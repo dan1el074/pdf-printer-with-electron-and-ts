@@ -24,6 +24,7 @@ export class Application {
             printers: [],
             codes: [],
             order: "",
+            repeatMapper: [],
             temporaryFile: path.join(__dirname, '../resources/temp/result.pdf')
         };
 
@@ -349,13 +350,16 @@ export class Application {
 
                     log(`Diretórios encontrados: ${message}`);
                     pdfJoin(codePath, this.data.temporaryFile)
-                        .then(() => {
-                            addWaterMarker(this.data.order, this.data.codes, this.data.temporaryFile)
+                        .then(repeatMapper => {
+                            this.data.repeatMapper = repeatMapper;
+                            console.log(`repeatMapper: ${repeatMapper}`);
+
+                            addWaterMarker(this.data.order, this.data.codes, this.data.temporaryFile, this.data.repeatMapper)
                                 .then(() => {
                                     let index: number = this.data.printers.findIndex((data): boolean => {
                                         return data.name == printer
                                     })
-
+ 
                                     if (this.data.printers[index].name == "Salvar como PDF") {
                                         log('Impressora selecionada: "Salvar como PDF"');
                                         this.saveToPdf();

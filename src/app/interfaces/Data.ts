@@ -4,5 +4,6 @@ interface Data {
     printers: Array<Printable>;
     codes: Array<Array<string>>;
     order: string;
+    repeatMapper: Array<Array<number>>;
     temporaryFile: string;
 }
