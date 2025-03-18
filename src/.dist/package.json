@@ -1,6 +1,6 @@
 {
   "name": "ImprimePDF-data",
-  "version": "3.0.2",
+  "version": "3.0.4",
   "description": "Um aplicativo já existente, mas escrito em Typescript",
   "main": "main.js",
   "scripts": {

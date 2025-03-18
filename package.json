@@ -4,7 +4,7 @@
   "description": "Um aplicativo já existente, mas escrito em Typescript",
   "scripts": {
     "build": "tsc",
-    "build:dev": "rm -rf ./dist && tsc && cd dist && mkdir dist && cd .. && cp -rv ./src/public ./src/resources ./dist && cp -rv src/.dist/* ./dist && cp -v src/config.json ./dist/config.json",
+    "build:dev": "rm -rf ./dist && tsc && mkdir -p dist/dist && cp -rv ./src/public ./src/resources ./dist && cp -rv src/.dist/* ./dist && cp -v src/config.json ./dist/config.json",
     "watch:dev": "tsc -w",
     "start:dev": "npm run build && electron ./dist/main.js",
     "build:prod": "npm run build:dev && cd dist && npm install && npm run build:prod && npm run config:prod"

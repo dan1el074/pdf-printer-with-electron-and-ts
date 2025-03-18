@@ -1,6 +1,6 @@
 # Aplicação ImprimePDF
 
-![Static Badge](https://img.shields.io/badge/status-finished-green) ![Static Badge](https://img.shields.io/badge/release-v3.0.1-blue)
+![Static Badge](https://img.shields.io/badge/status-finished-green) [![Static Badge](https://img.shields.io/badge/release-v3.0.4-blue)](https://github.com/dan1el074/pdf-printer-with-electron-and-ts/releases/tag/3.0.4)
 
 Este projeto é uma aplicação desktop em **Node.js**, usando **TypeScript** com o framework **Electron.js**, desenvolvida para o setor de PCP da empresa [Metaro Indústria e Comércio LTDA](https://www.metaro.com.br). Ela realiza uma varredura em um arquivo Excel e extrai códigos que representam projetos, dos quais precisam ser impressos em uma sequencia expecífica.
 
@@ -19,17 +19,18 @@ Os scripts só funcionam no Linux, portanto faça tudo dentro do "**Git Bash**" 
     git clone git@github.com:dan1el074/pdf-printer-with-electron-and-ts.git 
     ```
 
-3. Navegue até o diretório do projeto:
+2. Navegue até o diretório do projeto:
 
    ```bash
     cd pdf-printer-with-electron-and-ts
     ```
 
-4. Instale as dependências:
+3. Instale as dependências:
 
     ```bash
     npm install
     ```
+    
 ## Iniciar aplicação:
 
 Rode o seguinte comando no terminal:
