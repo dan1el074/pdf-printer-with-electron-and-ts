@@ -39,14 +39,18 @@ async function organizePDF(inputPath: string) {
 
         for (let i = 0; i < numPages; i++) {
             const page = pdfDoc.getPage(i);
-            const isRetrato = page.getSize().width > page.getSize().height;
+            page.setRotation(degrees(0));
 
-            if (isRetrato) {
+            if (page.getSize().width > page.getSize().height) {
                 page.setRotation(degrees(90));
-            }
 
-            if (page.getWidth() > 1190 && page.getWidth() < 1193) {
-                page.scale(0.706,0.706);
+                if (page.getWidth() > 1190 && page.getWidth() < 1193) {
+                    page.scale(0.706,0.706);
+                }
+
+                if (page.getWidth() > 1680 && page.getWidth() < 1685) {
+                    page.scale(0.5,0.5);
+                }
             }
         }
 
