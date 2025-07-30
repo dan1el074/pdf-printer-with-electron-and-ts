@@ -1,6 +1,6 @@
-import {degrees, PDFDocument, StandardFonts, rgb} from "pdf-lib";
+import { degrees, PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { log } from "./logService";
 import fs = require("fs/promises");
-import {log} from "./logService";
 
 export async function pdfJoin(arrayCodePath: Array<string>, temporaryFile: string): Promise<Array<Array<number>>> {
     return new Promise(async (resolve, reject) => {
@@ -109,4 +109,54 @@ export async function addWaterMarker(order: string, codes: Array<Array<String>>,
 
     const pdfBytes = await pdfDoc.save();
     await fs.writeFile(inputPath, pdfBytes);
+}
+
+export async function joinLevelProjects(suffixMapper: Array<Array<string>>, temporaryFile: string) {
+    const tempPathArray = temporaryFile.split("\\");
+    tempPathArray.pop();
+    const tempPath = tempPathArray.join("\\") + "\\";
+
+    for (let i=0; i<suffixMapper.length; i++) {
+        for (let j=0; j<suffixMapper[i].length; j++) {
+            let projectArray: Array<string> = suffixMapper[i][0].split("\\");
+            let projectName: string = projectArray[projectArray.length - 1];
+
+            if (j == 0) {
+                await fs.copyFile(suffixMapper[i][j], tempPath + projectName);
+                await organizePDF(tempPath + projectName);
+                continue;
+            }
+
+            const mainPDFBytes = await fs.readFile(tempPath + projectName);
+            const mainPdfDoc = await PDFDocument.load(mainPDFBytes);
+            const mainPage = mainPdfDoc.getPage(0);
+            const overlayPDFBytes = await fs.readFile(suffixMapper[i][j]);
+            const overlayPdfDoc = await PDFDocument.load(overlayPDFBytes);
+            const overlayPage = overlayPdfDoc.getPage(0);
+
+            if (overlayPage.getSize().width > overlayPage.getSize().height) {
+                overlayPage.setRotation(degrees(90));
+
+                if (overlayPage.getWidth() > 1190 && overlayPage.getWidth() < 1193) {
+                    overlayPage.scale(0.706,0.706);
+                }
+
+                if (overlayPage.getWidth() > 1680 && overlayPage.getWidth() < 1685) {
+                    overlayPage.scale(0.5,0.5);
+                }
+            }
+
+            const embeddedPage = await mainPdfDoc.embedPage(overlayPage);
+            mainPage.drawPage(embeddedPage, {
+                x: 0,
+                y: 0,
+                width: mainPage.getWidth(),
+                height: mainPage.getHeight(),
+            });
+
+
+            const modifiedPdfBytes = await mainPdfDoc.save();
+            await fs.writeFile(tempPath + projectName, modifiedPdfBytes);
+        }
+    }
 }

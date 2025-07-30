@@ -1,11 +1,11 @@
-import {app, Menu, ipcMain, dialog} from "electron";
-import {Window} from "../app/models/Window";
-import {log} from "../app/services/logService"
-import {getPrinters} from "../app/services/printerService";
-import {findCodes, insertDETs} from "../app/services/excelService";
-import {findCodePath} from "../app/services/pathService";
-import {pdfJoin, addWaterMarker} from "../app/services/pdfService";
-import {exec} from "child_process";
+import { app, Menu, ipcMain, dialog } from "electron";
+import { Window} from "../app/models/Window";
+import { log } from "../app/services/logService"
+import { getPrinters } from "../app/services/printerService";
+import { findCodes, insertDETs } from "../app/services/excelService";
+import { findCodePath, checkSuffix } from "../app/services/pathService";
+import { pdfJoin, addWaterMarker } from "../app/services/pdfService";
+import { exec } from "child_process";
 import * as path from "path";
 import fs = require("fs/promises");
 
@@ -25,7 +25,8 @@ export class Application {
             codes: [],
             order: "",
             repeatMapper: [],
-            temporaryFile: path.join(__dirname, '../resources/temp/result.pdf')
+            temporaryFile: path.join(__dirname, '../resources/temp/result.pdf'),
+            sufixMapper: [],
         };
 
         let options: Array<string> = [
@@ -121,7 +122,7 @@ export class Application {
                 tmpFile: configData.tmpFile
             }
 
-            let message = `Arquivo de configuração: {${this.span}    dev: ${configData.dev},${this.span}    version: ${configData.version},${this.span}    projectPath: ${configData.projectPath},${this.span}    adobePath: ${configData.adobePath},${this.span}}`;
+            let message = `Arquivo de configuração: {${this.span}    dev: ${configData.dev},${this.span}    version: ${configData.version},${this.span}    projectPath: ${configData.projectPath},${this.span}}`;
             log(message);
         } catch (error) {
             console.error('Erro ao ler o arquivo de configuração:', error);
@@ -192,12 +193,12 @@ export class Application {
                             this.data.codes = codes;
 
                             let message: string = `${this.span}[ \r\n`;
-                            codes.forEach(code => {
+                            this.data.codes.forEach(code => {
                                 message += `                [${code[0]}, ${code[1]}, ${code[2]}, ${code[3]}, ${code[4]}], \r\n`;
                             })
                             message += "            ]"
-
                             log(`Códigos encontrados: ${message}`);
+
                             this.actionFromBackend(
                                 'message/success',
                                 `Códigos encontrados: ${this.data.codes.length}`
@@ -341,55 +342,65 @@ export class Application {
             }
             this.running = true;
 
-            findCodePath(this.data.codes, this.configData.projectPath)
-                .then((codePath: Array<string>): void => {
-                    let message = ""
-                    codePath.forEach(path => {
-                        message += `${this.span}${path}`;
+            checkSuffix(this.data.codes, this.configData.projectPath, this.data.temporaryFile)
+                .then((sufix: Array<Array<string>>) => {
+                    this.data.sufixMapper = sufix
+
+                    let msg = ""
+                    sufix.forEach(currentSufix => {
+                        msg += `${this.span}${currentSufix}`;
                     })
+                    log(`Mapeamento de sufixos: ${msg}`);
 
-                    log(`Diretórios encontrados: ${message}`);
-                    pdfJoin(codePath, this.data.temporaryFile)
-                        .then(repeatMapper => {
-                            this.data.repeatMapper = repeatMapper;
-                            console.log(`repeatMapper: ${repeatMapper}`);
+                    findCodePath(this.data.codes, this.configData.projectPath, this.data.sufixMapper, this.data.temporaryFile)
+                        .then((codePath: Array<string>): void => {
+                            let message = ""
+                            codePath.forEach(path => {
+                                message += `${this.span}${path}`;
+                            })
+                            log(`Diretórios encontrados: ${message}`);
 
-                            addWaterMarker(this.data.order, this.data.codes, this.data.temporaryFile, this.data.repeatMapper)
-                                .then(() => {
-                                    let index: number = this.data.printers.findIndex((data): boolean => {
-                                        return data.name == printer
-                                    })
- 
-                                    if (this.data.printers[index].name == "Salvar como PDF") {
-                                        log('Impressora selecionada: "Salvar como PDF"');
-                                        this.saveToPdf();
-                                        resolve();
-                                        return;
-                                    }
+                            pdfJoin(codePath, this.data.temporaryFile)
+                                .then(repeatMapper => {
+                                    this.data.repeatMapper = repeatMapper;
 
-                                    this.data.printers[index].print(this.data.temporaryFile)
-                                        .then((result) => {
-                                            log(result);
-                                            setTimeout(() => {
-                                                this.actionFromBackend('message/success', result)
-                                            }, 500)
-                                            resolve()
+                                    addWaterMarker(this.data.order, this.data.codes, this.data.temporaryFile, this.data.repeatMapper)
+                                        .then(() => {
+                                            let index: number = this.data.printers.findIndex((data): boolean => {
+                                                return data.name == printer
+                                            })
+
+                                            if (this.data.printers[index].name == "Salvar como PDF") {
+                                                log('Impressora selecionada: "Salvar como PDF"');
+                                                this.saveToPdf();
+                                                resolve();
+                                                return;
+                                            }
+
+                                            this.data.printers[index].print(this.data.temporaryFile)
+                                                .then((result) => {
+                                                    log(result);
+                                                    setTimeout(() => {
+                                                        this.actionFromBackend('message/success', result)
+                                                    }, 500)
+                                                    resolve()
+                                                })
+                                                .catch(error => {
+                                                    log(error);
+                                                    reject(error)
+                                                });
                                         })
-                                        .catch(error => {
-                                            log(error);
-                                            reject(error)
-                                        });
+                                })
+                                .catch(error => {
+                                    log(error[0]);
+                                    this.checkDET(error);
                                 })
                         })
-                        .catch(error => {
-                            log(error[0]);
-                            this.checkDET(error);
+                        .catch((error: string): void => {
+                            log('Não é possível buscar diretórios sem os códigos')
+                            this.actionFromBackend('message/simpleError', error)
+                            reject(error);
                         })
-                })
-                .catch((error: string): void => {
-                    log('Não é possível buscar diretórios sem os códigos')
-                    this.actionFromBackend('message/simpleError', error)
-                    reject(error);
                 })
         })
     }

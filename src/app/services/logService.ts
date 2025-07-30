@@ -41,4 +41,6 @@ export function log(message: string): void {
             console.error('Erro ao adicionar logs ao arquivo:', err);
         }
     });
+
+    console.log("");
 }

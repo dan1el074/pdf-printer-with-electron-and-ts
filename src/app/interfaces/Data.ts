@@ -6,4 +6,5 @@ interface Data {
     order: string;
     repeatMapper: Array<Array<number>>;
     temporaryFile: string;
+    sufixMapper: Array<Array<string>>
 }
