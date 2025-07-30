@@ -1,6 +1,6 @@
 let contadorAlert: number  = 0;
 
-ipcRenderer.on('message/success', (event, data) => {
+ipcRenderer.on('message/success', (event: any, data: string) => {
     contadorAlert += 1;
     let contador = contadorAlert;
     let div = document.createElement('div');
@@ -20,7 +20,7 @@ ipcRenderer.on('message/success', (event, data) => {
     } catch (e) {}
 });
 
-ipcRenderer.on('message/error', (event, data) => {
+ipcRenderer.on('message/error', (event: any, data: string) => {
     contadorAlert += 1;
     let contador = contadorAlert;
     let div = document.createElement('div');
@@ -31,7 +31,7 @@ ipcRenderer.on('message/error', (event, data) => {
     alertContainer.appendChild(div);
 });
 
-ipcRenderer.on('message/simpleError', (event, data) => {
+ipcRenderer.on('message/simpleError', (event: any, data: string) => {
     contadorAlert += 1;
     let contador = contadorAlert;
     let div = document.createElement('div');
@@ -46,7 +46,7 @@ ipcRenderer.on('message/simpleError', (event, data) => {
     }, 5000);
 });
 
-ipcRenderer.on('message/options', (event, possibleDETFile) => {
+ipcRenderer.on('message/options', (event: any, possibleDETFile: string) => {
     contadorAlert += 1;
     const contador = contadorAlert;
     let div = document.createElement('div');

@@ -45,7 +45,7 @@ saveDetAndPrint.addEventListener('click', () => {
 })
 
 // recebendo att do backend
-ipcRenderer.on('app/setTitle', (_event, version: string): void => {
+ipcRenderer.on('app/setTitle', (_event: any, version: string): void => {
     appTitle.innerHTML += " " + version;
     windowTitle.innerHTML += " " + version;
 });
@@ -54,7 +54,7 @@ ipcRenderer.on('action/closeDialog', (): void => {
     showDialog = false;
 });
 
-ipcRenderer.on('set/fileName', (_event, data): void => {
+ipcRenderer.on('set/fileName', (_event: any, data: string): void => {
     placeholder.style.display = 'none';
     inputSearch.style.border = '2px solid #fff';
     newPlaceholder.style.display = 'inline';
@@ -64,20 +64,20 @@ ipcRenderer.on('set/fileName', (_event, data): void => {
     showDialog = false;
 });
 
-ipcRenderer.on('set/printers', (_event, data: Array<string>): void => {
+ipcRenderer.on('set/printers', (_event: any, data: Array<string>): void => {
     data.forEach((printer: string): void => {
         printersSelect.innerHTML += `<option value='${printer}'>${printer}</option>`;
     });
 });
 
-ipcRenderer.on('action/showDetPage', (_event, fileDET: string): void => {
+ipcRenderer.on('action/showDetPage', (_event: any, fileDET: string): void => {
     const detValue = document.getElementById('detValue');
     detValue.innerText = fileDET.split('.')[0];
     detPage.style.transform = 'translateX(-100%)';
     detInput.focus();
 });
 
-ipcRenderer.on('action/restart', (_event, fileDET: string): void => {
+ipcRenderer.on('action/restart', (_event: any, fileDET: string): void => {
     alertContainer.innerHTML = '';
     detPage.style.transform = 'translateX(100%)';
 });
