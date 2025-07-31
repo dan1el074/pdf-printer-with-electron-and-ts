@@ -44,7 +44,7 @@ export class Window {
     }
 
     public async loadIndex(): Promise<void> {
-        let indexPath = path.join(__dirname, '../../resources/views/index.html');
+        let indexPath = path.join(__dirname, '../../public/views/index.html');
         await this.mainWindow.loadFile(indexPath);
     }
 }
