@@ -37,7 +37,7 @@ async function organizePDF(inputPath: string) {
         const pdfDoc = await PDFDocument.load(inputBytes);
         const numPages = pdfDoc.getPageCount();
 
-        for (let i = 0; i < numPages; i++) {
+        for (let i=0; i<numPages; i++) {
             const page = pdfDoc.getPage(i);
             page.setRotation(degrees(0));
 
@@ -138,11 +138,11 @@ export async function joinLevelProjects(suffixMapper: Array<Array<string>>, temp
                 overlayPage.setRotation(degrees(90));
 
                 if (overlayPage.getWidth() > 1190 && overlayPage.getWidth() < 1193) {
-                    overlayPage.scale(0.706,0.706);
+                    overlayPage.scale(0.706, 0.706);
                 }
 
                 if (overlayPage.getWidth() > 1680 && overlayPage.getWidth() < 1685) {
-                    overlayPage.scale(0.5,0.5);
+                    overlayPage.scale(0.5, 0.5);
                 }
             }
 
@@ -153,7 +153,6 @@ export async function joinLevelProjects(suffixMapper: Array<Array<string>>, temp
                 width: mainPage.getWidth(),
                 height: mainPage.getHeight(),
             });
-
 
             const modifiedPdfBytes = await mainPdfDoc.save();
             await fs.writeFile(tempPath + projectName, modifiedPdfBytes);

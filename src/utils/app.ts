@@ -71,6 +71,7 @@ printersSelect.addEventListener('keypress', (event) => {
 });
 
 previousBtn.addEventListener('click', () => {
+    printBtn.style.backgroundColor = '#1689fc';
     actionPage.style.transform = 'translateX(100%)';
     alertContainer.innerHTML = '';
     firstAccess = true;
@@ -82,11 +83,14 @@ printBtn.addEventListener('blur', () => {
 });
 
 detPreviousBtn.addEventListener('click', () => {
+    printBtn.style.backgroundColor = '#1689fc';
     detPage.style.transform = 'translateX(100%)';
-    detInput.value = '';
+    actionPage.style.transform = 'translateX(100%)';
+    alertContainer.innerHTML = '';
+    firstAccess = true;
 
     setTimeout(() => {
-        document.getElementById('input-det').focus();
+        detInput.value = '';
     }, 300)
 })
 
