@@ -31,7 +31,7 @@ export async function findCodes(filePath: string): Promise<Array<Array<string>>>
     })
 }
 
-export async function insertDETs(codes: Array<Array<string>>, detNumbers: number, fileName: string): Promise<Array<Array<string>>> {
+export async function insertDETs(codes: Array<Array<string>>, codePath: Array<string>, detNumbers: number, fileName: string): Promise<void> {
     return new Promise((resolve, reject) => {
         let projectNumber = String(fileName.split('.')[0]);
         let index: number = codes.findIndex(code => {
@@ -42,21 +42,21 @@ export async function insertDETs(codes: Array<Array<string>>, detNumbers: number
             reject('Código com detalhamento não encontrado!')
         }
 
-        const newDetCodes: Array<Array<string>> = [];
+        const detPaths: Array<string> = [];
+        const detCodes: Array<Array<string>> = [];
 
-        for(let i: number = 0; i < detNumbers; i++) {
-            newDetCodes.push([
-                `${projectNumber}-DET${i + 1}`,
-                codes[index][1],
-                codes[index][2],
-                codes[index][3],
-                codes[index][4]
-            ])
+        for(let i=0; i<detNumbers; i++) {
+            const arr = codePath[index].split("\\");
+            let currentCode = arr[arr.length - 1].split(".")[0];
+            arr.pop();
+
+            detPaths.push(`${arr.join("\\")}\\${currentCode}-DET${i + 1}.pdf`);
+            detCodes.push([`${projectNumber}-DET${i + 1}`, codes[index][1], codes[index][2], codes[index][3], codes[index][4]]);
         }
 
-        let newCodes: Array<Array<string>> = codes;
-        newCodes.splice(index, 1, ...newDetCodes);
+        codePath.splice(index, 1, ...detPaths);
+        codes.splice(index, 1, ...detCodes);
 
-        resolve(newCodes);
+        resolve();
     });
 }

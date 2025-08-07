@@ -1,4 +1,4 @@
-import { app, Menu, ipcMain, dialog } from "electron";
+import { app, Menu, ipcMain, dialog, shell } from "electron";
 import { Window} from "../app/models/Window";
 import { log } from "../app/services/logService"
 import { getPrinters } from "../app/services/printerService";
@@ -23,6 +23,7 @@ export class Application {
             fileName: '',
             printers: [],
             codes: [],
+            codePath: [],
             order: "",
             repeatMapper: [],
             temporaryFile: path.join(__dirname, '../resources/temp/result.pdf'),
@@ -132,19 +133,19 @@ export class Application {
     private actionFromFrontend(route: string) {
         switch (route) {
             case 'app/minimize': {
-                ipcMain.on("app/minimize", () => {
+                ipcMain.on(route, () => {
                     this.window.mainWindow.minimize();
                 });
-                break
+                break;
             }
             case 'app/close': {
-                ipcMain.on("app/close", () => {
+                ipcMain.on(route, () => {
                     app.quit();
                 });
-                break
+                break;
             }
             case 'action/showDialog': {
-                ipcMain.on("action/showDialog", () => {
+                ipcMain.on(route, () => {
                     this.getPath()
                         .then((arr: Array<string>): void => {
                             this.data.path = arr[0];
@@ -154,33 +155,39 @@ export class Application {
                         log(error);
                     });
                 });
-                break
+                break;
             }
             case 'action/setDET': {
-                ipcMain.on("action/setDET", (_event, fileDET: string) => {
+                ipcMain.on(route, (_event, fileDET: string) => {
                     this.actionFromBackend('action/showDetPage', fileDET)
                 });
-                break
+                break;
             }
             case 'action/saveDETs': {
-                ipcMain.on("action/saveDETs", (_event, data: Array<string | number>): void => {
-                    log(`Número de DETs: ${data[0]}`);
-                    insertDETs(this.data.codes, data[0] as number, this.codeWithDET)
-                        .then(newCodes => {
+                ipcMain.on(route, (_event, userInput: Array<string | number>): void => {
+                    log(`Número de DETs: ${userInput[0]}`);
+                    insertDETs(this.data.codes, this.data.codePath, userInput[0] as number, this.codeWithDET)
+                        .then(() => {
                             let message: string = `${this.span}[ \r\n`;
-                            newCodes.forEach(code => {
+                            this.data.codes.forEach(code => {
                                 message += `                [${code[0]}, ${code[1]}, ${code[2]}, ${code[3]}, ${code[4]}], \r\n`;
                             })
                             message += "            ]"
                             log(`Novos códigos: ${message}`);
 
-                            this.restart(data[1] as string);
+                            message = ""
+                            this.data.codePath.forEach(path => {
+                                message += `${this.span}${path}`;
+                            })
+                            log(`Novos diretórios: ${message}`);
+
+                            this.restart(userInput[1] as string);
                         }).catch(error => log(error));
                 });
-                break
+                break;
             }
             case 'action/getCodes': {
-                ipcMain.on("action/getCodes", (_event, data: string) => {
+                ipcMain.on(route, (_event, data: string) => {
                     this.data.codes = [];
                     this.running = false;
                     this.data.order = data;
@@ -208,10 +215,10 @@ export class Application {
                         this.actionFromBackend('message/error', error)
                     });
                 });
-                break
+                break;
             }
             case 'app/start': {
-                ipcMain.on("app/start", (_event, printer: string): void => {
+                ipcMain.on(route, (_event, printer: string): void => {
                     this.startApplication(printer)
                         .then(() => {
                             this.running = false;
@@ -219,7 +226,7 @@ export class Application {
                         log(error);
                     });
                 });
-                break
+                break;
             }
         }
     }
@@ -287,14 +294,9 @@ export class Application {
     }
 
     private restart(printer: string) {
-        this.running = false;
         this.actionFromBackend('action/restart');
         setTimeout(() => {
-            this.startApplication(printer).then(() => {
-                this.running = false;
-            }).catch(error => {
-                log(error)
-            })
+            this.joinAll(printer)
         }, 500)
     }
 
@@ -316,9 +318,11 @@ export class Application {
 
                 try {
                     await fs.copyFile(this.data.temporaryFile, currentFilePath);
+                    await shell.openPath(currentFilePath);
                     log('Arquivo copiado com sucesso!');
                     setTimeout((): void => {
                         this.actionFromBackend('message/success', 'Arquivo salvo com sucesso!')
+
                     }, 500)
                     return
                 } catch (error) {
@@ -332,6 +336,46 @@ export class Application {
                 log('Diálogo de salvar cancelado');
             }
         })
+    }
+
+    private async joinAll(printer: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            pdfJoin(this.data.codePath, this.data.temporaryFile)
+                .then(repeatMapper => {
+                    this.data.repeatMapper = repeatMapper;
+
+                    addWaterMarker(this.data.order, this.data.codes, this.data.temporaryFile, this.data.repeatMapper)
+                        .then(() => {
+                            let index: number = this.data.printers.findIndex((data): boolean => {
+                                return data.name == printer
+                            })
+
+                            if (this.data.printers[index].name == "Salvar como PDF") {
+                                log('Impressora selecionada: "Salvar como PDF"');
+                                this.saveToPdf();
+                                resolve();
+                                return;
+                            }
+
+                            this.data.printers[index].print(this.data.temporaryFile)
+                                .then((result) => {
+                                    log(result);
+                                    setTimeout(() => {
+                                        this.actionFromBackend('message/success', result);
+                                    }, 500)
+                                    resolve();
+                                })
+                                .catch(error => {
+                                    log(error);
+                                    reject(error);
+                                });
+                        })
+                })
+                .catch(error => {
+                    log(error[0]);
+                    this.checkDET(error);
+                })
+        });
     }
 
     private startApplication(printer: string): Promise<void> {
@@ -354,47 +398,15 @@ export class Application {
 
                     findCodePath(this.data.codes, this.configData.projectPath, this.data.sufixMapper, this.data.temporaryFile)
                         .then((codePath: Array<string>): void => {
+                            this.data.codePath = codePath;
+
                             let message = ""
-                            codePath.forEach(path => {
+                            this.data.codePath.forEach(path => {
                                 message += `${this.span}${path}`;
                             })
                             log(`Diretórios encontrados: ${message}`);
 
-                            pdfJoin(codePath, this.data.temporaryFile)
-                                .then(repeatMapper => {
-                                    this.data.repeatMapper = repeatMapper;
-
-                                    addWaterMarker(this.data.order, this.data.codes, this.data.temporaryFile, this.data.repeatMapper)
-                                        .then(() => {
-                                            let index: number = this.data.printers.findIndex((data): boolean => {
-                                                return data.name == printer
-                                            })
-
-                                            if (this.data.printers[index].name == "Salvar como PDF") {
-                                                log('Impressora selecionada: "Salvar como PDF"');
-                                                this.saveToPdf();
-                                                resolve();
-                                                return;
-                                            }
-
-                                            this.data.printers[index].print(this.data.temporaryFile)
-                                                .then((result) => {
-                                                    log(result);
-                                                    setTimeout(() => {
-                                                        this.actionFromBackend('message/success', result)
-                                                    }, 500)
-                                                    resolve()
-                                                })
-                                                .catch(error => {
-                                                    log(error);
-                                                    reject(error)
-                                                });
-                                        })
-                                })
-                                .catch(error => {
-                                    log(error[0]);
-                                    this.checkDET(error);
-                                })
+                            this.joinAll(printer);
                         })
                         .catch((error: string): void => {
                             log('Não é possível buscar diretórios sem os códigos')
