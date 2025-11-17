@@ -1,6 +1,6 @@
 # Aplicação ImprimePDF
 
-![Static Badge](https://img.shields.io/badge/status-finished-green) [![Static Badge](https://img.shields.io/badge/release-v3.0.4-blue)](https://github.com/dan1el074/pdf-printer-with-electron-and-ts/releases/tag/4.0.3)
+![Static Badge](https://img.shields.io/badge/status-finished-green) [![Static Badge](https://img.shields.io/badge/release-v4.0.3-blue)](https://github.com/dan1el074/pdf-printer-with-electron-and-ts/releases/tag/4.0.3)
 
 Este projeto é uma aplicação desktop em **Node.js**, usando **TypeScript** com o framework **Electron.js**, desenvolvida para o setor de PCP da empresa [Metaro Indústria e Comércio LTDA](https://www.metaro.com.br). Ela realiza uma varredura em um arquivo Excel e extrai códigos que representam projetos, dos quais precisam ser impressos em uma sequencia expecífica.
 
