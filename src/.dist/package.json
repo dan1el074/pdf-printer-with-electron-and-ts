@@ -1,12 +1,12 @@
 {
-  "name": "ImprimePDF-data",
-  "version": "4.0.1",
+  "name": "imprime-pdf",
+  "version": "4.0.3",
   "description": "Um aplicativo já existente, mas escrito em Typescript",
   "main": "main.js",
   "scripts": {
     "start:prod": "electron ./main.js",
     "build:prod": "electron-packager ./ ImprimePDF --platform=win32 --arch=x64 --out=dist --overwrite --icon=public/images/icon.ico",
-    "config:prod": "rm -vf ./dist/ImprimePDF-win32-x64/LICENSE ./dist/ImprimePDF-win32-x64/LICENSES.chromium.html"
+    "config:prod": "rm -vf ./dist/ImprimePDF-win32-x64/LICENSE ./dist/ImprimePDF-win32-x64/LICENSES.chromium.html ./dist/ImprimePDF-win32-x64/version"
   },
   "keywords": [
     "Electron",
