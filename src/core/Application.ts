@@ -271,7 +271,7 @@ export class Application {
             let filePath: string;
             filePath = folderPath;
 
-            if (arrayFolder[1] === "metaro-server") {
+            if (arrayFolder[1].includes("metaro-server")) {
                 filePath = "\\" + folderPath;
             }
 
