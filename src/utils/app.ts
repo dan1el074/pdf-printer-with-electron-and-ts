@@ -2,28 +2,28 @@ const nextBtn: HTMLElement = document.getElementById('next-btn');
 const actionPage: HTMLElement = document.querySelector('.action-page');
 const previousBtn: HTMLElement = document.getElementById('previous-btn');
 const detPreviousBtn: HTMLElement = document.getElementById('det-previous-btn');
-let firstAccess = true;
 
 inputOrder.addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
+        event.preventDefault();
+        event.stopPropagation();
+        if (isBusy) return;
         nextBtn.click();
     }
 });
 
 document.addEventListener('keypress', (event) => {
-    if(actionPage.style.transform === 'translateX(-100%)' || detPage.style.transform !== 'translateX(-100%)') {
+    if (isBusy || event.target instanceof HTMLButtonElement || event.target instanceof HTMLSelectElement) return;
+    if(actionPage.style.transform === 'translateX(-100%)' && detPage.style.transform !== 'translateX(-100%)') {
         if (event.key === 'Enter') {
-            if(firstAccess) {
-                firstAccess = false;
-                return;
-            }
-
+            event.preventDefault();
             printBtn.click();
         }
     }
 });
 
 nextBtn.addEventListener('click', () => {
+    if (isBusy) return;
     const fileSpan: HTMLElement = document.getElementById('new-placeholder');
     let validatedOrder = false;
     let validatedFile = false;
@@ -55,7 +55,7 @@ nextBtn.addEventListener('click', () => {
         inputOrder.style.border = '2px solid #fff';
         error2.innerHTML = '';
         actionPage.style.transform = 'translateX(-100%)';
-        ipcRenderer.send('action/getCodes', inputOrder.value.toUpperCase());
+        sendToBackend('action/getCodes', inputOrder.value.toUpperCase());
         setTimeout(() => {
             printersSelect.focus();
         }, 300)
@@ -65,29 +65,24 @@ nextBtn.addEventListener('click', () => {
 printersSelect.addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
         event.preventDefault();
+        event.stopPropagation();
+        if (isBusy) return;
         printBtn.click();
         return
     }
 });
 
 previousBtn.addEventListener('click', () => {
-    printBtn.style.backgroundColor = '#1689fc';
+    if (isBusy) return;
     actionPage.style.transform = 'translateX(100%)';
     alertContainer.innerHTML = '';
-    firstAccess = true;
-});
-
-printBtn.addEventListener('blur', () => {
-    printBtn.style.backgroundColor = '#1689fc';
-    printBtn.style.transition = '1s';
 });
 
 detPreviousBtn.addEventListener('click', () => {
-    printBtn.style.backgroundColor = '#1689fc';
+    if (isBusy) return;
     detPage.style.transform = 'translateX(100%)';
     actionPage.style.transform = 'translateX(100%)';
     alertContainer.innerHTML = '';
-    firstAccess = true;
 
     setTimeout(() => {
         detInput.value = '';
@@ -96,6 +91,9 @@ detPreviousBtn.addEventListener('click', () => {
 
 detPage.addEventListener('keypress', (event) => {
     if (event.key === 'Enter') {
+        event.preventDefault();
+        event.stopPropagation();
+        if (isBusy) return;
         saveDetAndPrint.click();
         return
     }

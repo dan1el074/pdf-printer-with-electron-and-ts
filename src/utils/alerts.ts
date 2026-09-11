@@ -42,7 +42,8 @@ ipcRenderer.on('message/simpleError', (event: any, data: string) => {
     alertContainer.appendChild(div);
 
     setTimeout(() => {
-        document.getElementById(`alert${contador}`).remove();
+        const currentAlert = document.getElementById(`alert${contador}`);
+        if (currentAlert) currentAlert.remove();
     }, 5000);
 });
 
@@ -63,11 +64,13 @@ ipcRenderer.on('message/options', (event: any, possibleDETFile: string) => {
 
     const btnSetDet = document.getElementById('btnSetDET');
     btnSetDet.addEventListener('click', () => {
+        if (isBusy) return;
         sendToBackend('action/setDET', possibleDETFile)
     })
 
     const btnCancelDet = document.getElementById('btnCancelDET');
     btnCancelDet.addEventListener('click', () => {
+        if (isBusy) return;
         actionPage.style.transform = 'translateX(100%)';
         alertContainer.innerHTML = '';
     })

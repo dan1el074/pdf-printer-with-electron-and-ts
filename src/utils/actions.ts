@@ -13,8 +13,27 @@ const detInput: HTMLInputElement = <HTMLInputElement>document.querySelector('#in
 const alertContainer: HTMLElement = document.querySelector('.alert-container');
 const saveDetAndPrint: HTMLElement = document.getElementById('det-btn');
 let showDialog: boolean = false;
+let isBusy: boolean = false;
+
+function setBusy(busy: boolean): void {
+    isBusy = busy;
+    document.querySelectorAll<HTMLButtonElement | HTMLInputElement | HTMLSelectElement>(
+        'section button, section input, section select, .alert-container button'
+    ).forEach(control => control.disabled = busy);
+    inputSearch.style.pointerEvents = busy ? 'none' : '';
+    document.body.setAttribute('aria-busy', String(busy));
+    printBtn.textContent = busy ? 'Processando...' : 'Imprimir';
+}
+
+ipcRenderer.on('app/setBusy', (_event: any, busy: boolean): void => {
+    setBusy(busy);
+});
 
 function sendToBackend(route: string, data?: any) {
+    if (isBusy) return;
+    if (['app/start', 'action/saveDETs', 'action/getCodes', 'action/showDialog'].includes(route)) {
+        setBusy(true);
+    }
     if(data) {
         ipcRenderer.send(route, data);
         return
@@ -24,24 +43,25 @@ function sendToBackend(route: string, data?: any) {
 
 // mandando att pro backend
 inputSearch.addEventListener('click', () => {
-    if (!showDialog) {
+    if (!showDialog && !isBusy) {
         sendToBackend('action/showDialog');
         showDialog = true;
     }
 });
 
 printBtn.addEventListener('click', () => {
+    if (isBusy) return;
     const chosenPrinter: HTMLSelectElement = document.querySelector('#printers-select');
+    if (!chosenPrinter.value) return;
+    alertContainer.innerHTML = '';
     sendToBackend('app/start', chosenPrinter.value);
-    printBtn.style.backgroundColor = '#00E500';
-    printBtn.style.transition = '1s';
 });
 
 saveDetAndPrint.addEventListener('click', () => {
+    if (isBusy) return;
     const detValue: HTMLSelectElement = document.querySelector('#input-det')
     const printer: HTMLSelectElement = document.querySelector('#printers-select');
     sendToBackend('action/saveDETs', [detValue.value, printer.value]);
-    detValue.value = '';
 })
 
 // recebendo att do backend
@@ -65,8 +85,12 @@ ipcRenderer.on('set/fileName', (_event: any, data: string): void => {
 });
 
 ipcRenderer.on('set/printers', (_event: any, data: Array<string>): void => {
+    printersSelect.innerHTML = '';
     data.forEach((printer: string): void => {
-        printersSelect.innerHTML += `<option value='${printer}'>${printer}</option>`;
+        const option: HTMLOptionElement = document.createElement('option');
+        option.value = printer;
+        option.textContent = printer;
+        printersSelect.appendChild(option);
     });
 });
 

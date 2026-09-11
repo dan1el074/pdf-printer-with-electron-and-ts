@@ -48,17 +48,17 @@ export class Application {
 
     public init(): void {
         this.readConfigFile()
-            .then((): void => {
-                this.createResultPath()
-                    .then((): void => {
-                        app.whenReady()
+            .then((): Promise<void> => {
+                return this.createResultPath()
+                    .then((): Promise<void> => {
+                        return app.whenReady()
                             .then(async (): Promise<void> => {
                                 this.window = new Window(this.configData.dev);
                                 await this.window.loadIndex();
 
                                 this.actionFromBackend("app/setTitle", this.configData.version);
 
-                                getPrinters()
+                                return getPrinters(this.window.mainWindow.webContents)
                                     .then(printers => {
                                         this.data.printers = printers;
                                         const NameOfPrinters = this.data.printers.map(printer => ' ' + printer.name)
@@ -73,12 +73,15 @@ export class Application {
                                     })
                                     .catch(error => {
                                         log(error);
-                                        this.actionFromBackend('message/error', error);
+                                        this.actionFromBackend('message/error', 'Não foi possível consultar as impressoras disponíveis.');
                                     });
                             })
                     })
             })
-            .catch(erro => log(erro));
+            .catch(erro => {
+                console.error('Erro ao iniciar a aplicação:', erro);
+                app.quit();
+            });
     }
 
     private async copyFileIfNotExists(source: string, destination: string) {
@@ -127,6 +130,7 @@ export class Application {
             log(message);
         } catch (error) {
             console.error('Erro ao ler o arquivo de configuração:', error);
+            throw error;
         }
     }
 
@@ -146,98 +150,94 @@ export class Application {
             }
             case 'action/showDialog': {
                 ipcMain.on(route, () => {
-                    this.getPath()
-                        .then((arr: Array<string>): void => {
-                            this.data.path = arr[0];
-                            this.data.fileName = arr[1];
-                            this.actionFromBackend('set/fileName', this.data.fileName)
-                        }).catch(error => {
-                        log(error);
+                    void this.runOperation(async () => {
+                        try {
+                            const result = await this.getPath();
+                            if (result) {
+                                this.data.path = result[0];
+                                this.data.fileName = result[1];
+                                this.data.codes = [];
+                                this.actionFromBackend('set/fileName', this.data.fileName);
+                            }
+                        } finally {
+                            this.actionFromBackend('action/closeDialog');
+                        }
                     });
                 });
                 break;
             }
             case 'action/setDET': {
                 ipcMain.on(route, (_event, fileDET: string) => {
-                    this.actionFromBackend('action/showDetPage', fileDET)
+                    if (this.running || fileDET !== this.codeWithDET) return;
+                    this.actionFromBackend('action/showDetPage', fileDET);
                 });
                 break;
             }
             case 'action/saveDETs': {
                 ipcMain.on(route, (_event, userInput: Array<string | number>): void => {
-                    log(`Número de DETs: ${userInput[0]}`);
-                    insertDETs(this.data.codes, this.data.codePath, userInput[0] as number, this.codeWithDET)
-                        .then(() => {
-                            let message: string = `${this.span}[ \r\n`;
-                            this.data.codes.forEach(code => {
-                                message += `                [${code[0]}, ${code[1]}, ${code[2]}, ${code[3]}, ${code[4]}], \r\n`;
-                            })
-                            message += "            ]"
-                            log(`Novos códigos: ${message}`);
-
-                            message = ""
-                            this.data.codePath.forEach(path => {
-                                message += `${this.span}${path}`;
-                            })
-                            log(`Novos diretórios: ${message}`);
-
-                            this.restart(userInput[1] as string);
-                        }).catch(error => log(error));
+                    void this.runOperation(async () => {
+                        const count = Number(userInput[0]);
+                        if (!this.codeWithDET || !Number.isInteger(count) || count <= 0) {
+                            throw new Error('Informe um número de detalhamentos válido.');
+                        }
+                        log('Número de DETs: ' + count);
+                        await insertDETs(this.data.codes, this.data.codePath, count, this.codeWithDET);
+                        this.codeWithDET = undefined;
+                        this.actionFromBackend('action/restart');
+                        await this.joinAll(userInput[1] as string);
+                    });
                 });
                 break;
             }
             case 'action/getCodes': {
                 ipcMain.on(route, (_event, data: string) => {
-                    this.data.codes = [];
-                    this.running = false;
-                    this.data.order = data;
-
-                    let message = `Imputs: ${this.span}Arquivo com os códigos: ${this.data.path}${this.span}Número do pedido: ${this.data.order}`;
-                    log(message);
-
-                    findCodes(this.data.path)
-                        .then((codes: Array<Array<string>>): void => {
-                            this.data.codes = codes;
-
-                            let message: string = `${this.span}[ \r\n`;
-                            this.data.codes.forEach(code => {
-                                message += `                [${code[0]}, ${code[1]}, ${code[2]}, ${code[3]}, ${code[4]}], \r\n`;
-                            })
-                            message += "            ]"
-                            log(`Códigos encontrados: ${message}`);
-
-                            this.actionFromBackend(
-                                'message/success',
-                                `Códigos encontrados: ${this.data.codes.length}`
-                            );
-                        }).catch((error: string): void => {
-                        log(error);
-                        this.actionFromBackend('message/error', error)
+                    void this.runOperation(async () => {
+                        this.data.codes = [];
+                        this.codeWithDET = undefined;
+                        this.data.order = data;
+                        this.data.codes = await findCodes(this.data.path);
+                        log('Códigos encontrados: ' + JSON.stringify(this.data.codes));
+                        this.actionFromBackend('message/success', 'Códigos encontrados: ' + this.data.codes.length);
                     });
                 });
                 break;
             }
             case 'app/start': {
                 ipcMain.on(route, (_event, printer: string): void => {
-                    this.startApplication(printer)
-                        .then(() => {
-                            this.running = false;
-                        }).catch(error => {
-                        log(error);
-                    });
+                    void this.startApplication(printer);
                 });
                 break;
             }
         }
     }
 
-    private actionFromBackend(route: string, message?: string | Array<string>): void {
-        if (message) {
+    private actionFromBackend(route: string, message?: string | Array<string> | boolean): void {
+        if (message !== undefined) {
             this.window.mainWindow.webContents.send(route, message);
-            return
+            return;
         }
-
         this.window.mainWindow.webContents.send(route);
+    }
+
+    private async runOperation(operation: () => Promise<void>): Promise<void> {
+        // Uma única operação pode alterar os dados ou o PDF temporário por vez.
+        if (this.running) return;
+        this.running = true;
+        this.actionFromBackend('app/setBusy', true);
+        try {
+            await operation();
+        } catch (error) {
+            log(String(error));
+            if (Array.isArray(error) && typeof error[1] === 'string') {
+                this.checkDET(error);
+            } else {
+                const message = error instanceof Error ? error.message : String(Array.isArray(error) ? error[0] : error);
+                this.actionFromBackend('message/simpleError', message);
+            }
+        } finally {
+            this.running = false;
+            this.actionFromBackend('app/setBusy', false);
+        }
     }
 
     private hideMenu() {
@@ -246,174 +246,72 @@ export class Application {
         Menu.setApplicationMenu(menu);
     }
 
-    private async getPath(): Promise<Array<string>> {
-        return new Promise(async (resolve, reject) => {
-            let dialogPath = await dialog.showOpenDialog({
-                defaultPath: app.getPath("desktop"),
-                title: 'Selecione o arquivo:',
-                buttonLabel: 'Selecionar',
-                filters: [
-                    {
-                        name: 'Excel',
-                        extensions: ['xlsx', 'xls']
-                    }
-                ],
-            });
-
-            if (dialogPath.canceled) {
-                this.actionFromBackend('action/closeDialog')
-                reject('Operação cancelada');
-            }
-
-            const folderPath = String(dialogPath.filePaths).replace("\\\\", "\\");
-            const arrayFolder = folderPath.split("\\");
-            const fileName = arrayFolder[arrayFolder.length - 1];
-            let filePath: string;
-            filePath = folderPath;
-
-            if (arrayFolder[1].includes("metaro-server")) {
-                filePath = "\\" + folderPath;
-            }
-
-            this.actionFromBackend('action/closeDialog')
-            resolve([filePath, fileName]);
-        })
+    private async getPath(): Promise<Array<string> | undefined> {
+        const result = await dialog.showOpenDialog({
+            defaultPath: app.getPath("desktop"),
+            title: 'Selecione o arquivo:',
+            buttonLabel: 'Selecionar',
+            filters: [{ name: 'Excel', extensions: ['xlsx', 'xls'] }]
+        });
+        if (result.canceled || !result.filePaths.length) return;
+        const filePath = result.filePaths[0];
+        return [filePath, path.basename(filePath)];
     }
 
     private checkDET(error: Array<string>): void {
-        let filePath = error[1];
-        let arrayFilePath = filePath.split('\\');
-        this.codeWithDET = arrayFilePath[arrayFilePath.length - 1];
-
+        this.codeWithDET = path.basename(error[1]);
         this.actionFromBackend('message/error', error[0]);
         if (!this.codeWithDET.includes('DET')) {
-            setTimeout(() => {
-                this.actionFromBackend('message/options', this.codeWithDET);
-            }, 500)
+            this.actionFromBackend('message/options', this.codeWithDET);
         }
     }
 
-    private restart(printer: string) {
-        this.actionFromBackend('action/restart');
-        setTimeout(() => {
-            this.joinAll(printer)
-        }, 500)
-    }
-
     private async saveToPdf(): Promise<void> {
-        setTimeout((): void => {
-            this.actionFromBackend('message/success', 'Processando arquivos')
-        }, 500)
-
-        await dialog.showSaveDialog({
+        const result = await dialog.showSaveDialog({
             title: 'Salvar arquivo',
             defaultPath: app.getPath("desktop"),
-            filters: [
-                {name: 'Text Files', extensions: ['pdf']}
-            ]
-        }).then(async result => {
-            if (!result.canceled) {
-                let currentFilePath: string = result.filePath;
-                log(`Caminho para salvar arquivo: ${currentFilePath}`);
-
-                try {
-                    await fs.copyFile(this.data.temporaryFile, currentFilePath);
-                    await shell.openPath(currentFilePath);
-                    log('Arquivo copiado com sucesso!');
-                    setTimeout((): void => {
-                        this.actionFromBackend('message/success', 'Arquivo salvo com sucesso!')
-
-                    }, 500)
-                    return
-                } catch (error) {
-                    log(`Erro ao copiar o arquivo: ${error}`);
-                    setTimeout((): void => {
-                        this.actionFromBackend('message/simpleError', 'Erro ao copiar o arquivo!')
-                    }, 500)
-                    return;
-                }
-            } else {
-                log('Diálogo de salvar cancelado');
-            }
-        })
+            filters: [{ name: 'PDF', extensions: ['pdf'] }]
+        });
+        if (result.canceled || !result.filePath) {
+            log('Diálogo de salvar cancelado');
+            return;
+        }
+        await fs.copyFile(this.data.temporaryFile, result.filePath);
+        this.actionFromBackend('message/success', 'Arquivo salvo com sucesso!');
+        const openError = await shell.openPath(result.filePath);
+        if (openError) {
+            this.actionFromBackend('message/simpleError', 'Arquivo salvo, mas não foi possível abri-lo: ' + openError);
+        }
     }
 
     private async joinAll(printer: string): Promise<void> {
-        return new Promise((resolve, reject) => {
-            pdfJoin(this.data.codePath, this.data.temporaryFile)
-                .then(repeatMapper => {
-                    this.data.repeatMapper = repeatMapper;
+        const selectedPrinter = this.data.printers.find(item => item.name === printer);
+        if (!selectedPrinter) throw new Error('Selecione uma impressora válida.');
 
-                    addWaterMarker(this.data.order, this.data.codes, this.data.temporaryFile, this.data.repeatMapper)
-                        .then(() => {
-                            let index: number = this.data.printers.findIndex((data): boolean => {
-                                return data.name == printer
-                            })
-
-                            if (this.data.printers[index].name == "Salvar como PDF") {
-                                log('Impressora selecionada: "Salvar como PDF"');
-                                this.saveToPdf();
-                                resolve();
-                                return;
-                            }
-
-                            this.data.printers[index].print(this.data.temporaryFile)
-                                .then((result) => {
-                                    log(result);
-                                    setTimeout(() => {
-                                        this.actionFromBackend('message/success', result);
-                                    }, 500)
-                                    resolve();
-                                })
-                                .catch(error => {
-                                    log(error);
-                                    reject(error);
-                                });
-                        })
-                })
-                .catch(error => {
-                    log(error[0]);
-                    this.checkDET(error);
-                })
-        });
+        this.data.repeatMapper = await pdfJoin(this.data.codePath, this.data.temporaryFile);
+        await addWaterMarker(this.data.order, this.data.codes, this.data.temporaryFile, this.data.repeatMapper);
+        if (selectedPrinter.name === "Salvar como PDF") {
+            await this.saveToPdf();
+            return;
+        }
+        const result = await selectedPrinter.print(this.data.temporaryFile);
+        log(result);
+        this.actionFromBackend('message/success', result);
     }
 
-    private startApplication(printer: string): Promise<void> {
-        return new Promise((resolve, reject) => {
-            if (this.running) {
-                reject('Aplicação ainda não foi finalizada!');
-                return
+    private async startApplication(printer: string): Promise<void> {
+        await this.runOperation(async () => {
+            if (!this.data.printers.some(item => item.name === printer)) {
+                throw new Error('Selecione uma impressora válida.');
             }
-            this.running = true;
-
-            checkSuffix(this.data.codes, this.configData.projectPath, this.data.temporaryFile)
-                .then((sufix: Array<Array<string>>) => {
-                    this.data.sufixMapper = sufix
-
-                    let msg = ""
-                    sufix.forEach(currentSufix => {
-                        msg += `${this.span}${currentSufix}`;
-                    })
-                    log(`Mapeamento de sufixos: ${msg}`);
-
-                    findCodePath(this.data.codes, this.configData.projectPath, this.data.sufixMapper, this.data.temporaryFile)
-                        .then((codePath: Array<string>): void => {
-                            this.data.codePath = codePath;
-
-                            let message = ""
-                            this.data.codePath.forEach(path => {
-                                message += `${this.span}${path}`;
-                            })
-                            log(`Diretórios encontrados: ${message}`);
-
-                            this.joinAll(printer);
-                        })
-                        .catch((error: string): void => {
-                            log('Não é possível buscar diretórios sem os códigos')
-                            this.actionFromBackend('message/simpleError', error)
-                            reject(error);
-                        })
-                })
-        })
+            this.codeWithDET = undefined;
+            // Releia os códigos para não acumular alterações de sufixos da impressão anterior.
+            this.data.codes = await findCodes(this.data.path);
+            this.data.sufixMapper = await checkSuffix(this.data.codes, this.configData.projectPath, this.data.temporaryFile);
+            log('Mapeamento de sufixos: ' + JSON.stringify(this.data.sufixMapper));
+            this.data.codePath = await findCodePath(this.data.codes, this.configData.projectPath, this.data.sufixMapper, this.data.temporaryFile);
+            log('Diretórios encontrados: ' + JSON.stringify(this.data.codePath));
+            await this.joinAll(printer);
+        });
     }
 }

@@ -56,6 +56,19 @@ section .btn:hover {
     transition: 0.3s;
 }
 
+section .btn:disabled,
+.alert-container button:disabled {
+    background-color: #929292;
+    cursor: wait;
+    opacity: 0.65;
+}
+
+section input:disabled,
+section select:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
 section .btn.btn-next {
     position: absolute;
     bottom: 30px;
